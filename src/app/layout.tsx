@@ -8,6 +8,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/header';
 import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/contexts/auth-context';
+import { DuesProvider } from '@/contexts/dues-context'; // Added DuesProvider
 
 export const metadata: Metadata = {
   title: 'UniPay - University Payment Management',
@@ -23,11 +24,13 @@ export default function RootLayout({
     <html lang="en" className={cn(GeistSans.variable, "dark")} style={{colorScheme: 'dark'}}>
       <body className="antialiased bg-background text-foreground min-h-screen flex flex-col">
         <AuthProvider>
-          <Header />
-          <main className="flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-            {children}
-          </main>
-          <Toaster />
+          <DuesProvider> {/* Added DuesProvider */}
+            <Header />
+            <main className="flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+              {children}
+            </main>
+            <Toaster />
+          </DuesProvider>
         </AuthProvider>
       </body>
     </html>

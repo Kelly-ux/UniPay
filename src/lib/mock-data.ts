@@ -1,3 +1,4 @@
+
 export type DueStatus = 'Paid' | 'Unpaid' | 'Overdue';
 
 export interface Due {
@@ -10,6 +11,7 @@ export interface Due {
   dueDate: string; // YYYY-MM-DD
   status: DueStatus;
   paymentMethodSuggestion?: string; // For pre-filling reminder form
+  paymentDate?: string; // YYYY-MM-DD, set when paid
 }
 
 const today = new Date();
@@ -20,7 +22,7 @@ const addDays = (date: Date, days: number): Date => {
   return result;
 };
 
-export const mockDues: Due[] = [
+export const mockDuesInitial: Due[] = [
   {
     id: '1',
     studentName: 'Alice Wonderland',
@@ -52,6 +54,7 @@ export const mockDues: Due[] = [
     amount: 50.25,
     dueDate: formatDate(addDays(today, -5)), // Paid (recently)
     status: 'Paid',
+    paymentDate: formatDate(addDays(today, -2)),
   },
   {
     id: '4',
@@ -84,6 +87,7 @@ export const mockDues: Due[] = [
     amount: 1000.00,
     dueDate: formatDate(addDays(today, 60)), // Paid (well in advance)
     status: 'Paid',
+    paymentDate: formatDate(addDays(today, -10)),
   },
    {
     id: '7',
@@ -109,6 +113,6 @@ export const mockDues: Due[] = [
   },
 ];
 
-export const uniqueSchools = Array.from(new Set(mockDues.map(due => due.school))).sort();
-export const uniqueDepartments = Array.from(new Set(mockDues.map(due => due.department))).sort();
+export const uniqueSchools = Array.from(new Set(mockDuesInitial.map(due => due.school))).sort();
+export const uniqueDepartments = Array.from(new Set(mockDuesInitial.map(due => due.department))).sort();
 export const dueStatuses: DueStatus[] = ['Paid', 'Unpaid', 'Overdue'];

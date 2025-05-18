@@ -5,11 +5,13 @@ import React, { useState, useMemo } from 'react';
 import { DueFilters } from '@/components/due-filters';
 import { DueCard } from '@/components/due-card';
 import type { Due } from '@/lib/mock-data';
-import { mockDues, uniqueSchools, uniqueDepartments, dueStatuses } from '@/lib/mock-data';
+import { uniqueSchools, uniqueDepartments, dueStatuses } from '@/lib/mock-data';
 import { Frown } from 'lucide-react';
 import { AuthGuard } from '@/components/auth-guard';
+import { useDues } from '@/contexts/dues-context'; // Import useDues
 
 function DuesDashboardContent() {
+  const { dues: allDues } = useDues(); // Use dues from context
   const [filters, setFilters] = useState({
     school: 'all',
     department: 'all',
@@ -22,7 +24,7 @@ function DuesDashboardContent() {
   };
 
   const filteredDues = useMemo(() => {
-    return mockDues.filter((due: Due) => {
+    return allDues.filter((due: Due) => {
       const schoolMatch = filters.school === 'all' || due.school === filters.school;
       const departmentMatch = filters.department === 'all' || due.department === filters.department;
       const statusMatch = filters.status === 'all' || due.status === filters.status;
@@ -31,7 +33,12 @@ function DuesDashboardContent() {
                               due.studentName.toLowerCase().includes(filters.searchTerm.toLowerCase());
       return schoolMatch && departmentMatch && statusMatch && searchTermMatch;
     });
-  }, [filters]);
+  }, [allDues, filters]);
+
+  // Dynamically generate unique schools and departments from context dues
+  const currentUniqueSchools = useMemo(() => Array.from(new Set(allDues.map(due => due.school))).sort(), [allDues]);
+  const currentUniqueDepartments = useMemo(() => Array.from(new Set(allDues.map(due => due.department))).sort(), [allDues]);
+
 
   return (
     <div className="space-y-8">
@@ -40,8 +47,8 @@ function DuesDashboardContent() {
       </h1>
       
       <DueFilters
-        schools={uniqueSchools}
-        departments={uniqueDepartments}
+        schools={currentUniqueSchools}
+        departments={currentUniqueDepartments}
         statuses={dueStatuses}
         onFilterChange={handleFilterChange}
         initialFilters={filters}
@@ -58,7 +65,7 @@ function DuesDashboardContent() {
           <Frown className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold text-foreground">No Dues Found</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Try adjusting your filters or search term.
+            Try adjusting your filters or search term. Admins can add new dues.
           </p>
         </div>
       )}
