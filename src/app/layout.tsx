@@ -1,10 +1,13 @@
+
 import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
-import { GeistMono } from 'geist/font/mono';
+// Removed GeistMono import as it was causing issues and not explicitly used.
+// If needed, ensure 'geist' package is correctly installed and configured.
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/header';
 import { cn } from '@/lib/utils';
+import { AuthProvider } from '@/contexts/auth-context';
 
 export const metadata: Metadata = {
   title: 'UniPay - University Payment Management',
@@ -17,13 +20,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn(GeistSans.variable, GeistMono.variable, "dark")} style={{colorScheme: 'dark'}}>
+    <html lang="en" className={cn(GeistSans.variable, "dark")} style={{colorScheme: 'dark'}}>
       <body className="antialiased bg-background text-foreground min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-          {children}
-        </main>
-        <Toaster />
+        <AuthProvider>
+          <Header />
+          <main className="flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            {children}
+          </main>
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

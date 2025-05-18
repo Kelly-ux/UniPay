@@ -1,18 +1,20 @@
-"use client"; // This page uses client hooks for searchParams
+
+"use client"; 
 
 import { Suspense } from 'react';
 import { ReminderForm } from '@/components/reminder-form';
 import { useSearchParams } from 'next/navigation';
 import type { ReminderFormValues } from '@/lib/schemas';
 import { Skeleton } from "@/components/ui/skeleton";
+import { AuthGuard } from '@/components/auth-guard';
 
-function ReminderPageContent() {
+function ReminderPageCore() {
   const searchParams = useSearchParams();
 
-  const initialData: Partial<ReminderFormValues & { dueDate?: string }> = { // dueDate can be string from query
+  const initialData: Partial<ReminderFormValues & { dueDate?: string }> = {
     studentName: searchParams.get('studentName') || '',
     dueAmount: searchParams.get('dueAmount') ? parseFloat(searchParams.get('dueAmount')!) : undefined,
-    dueDate: searchParams.get('dueDate') || undefined, // Pass as string, form will convert to Date
+    dueDate: searchParams.get('dueDate') ? new Date(searchParams.get('dueDate')!) : undefined,
     schoolName: searchParams.get('schoolName') || '',
     departmentName: searchParams.get('departmentName') || '',
     paymentMethod: searchParams.get('paymentMethod') || '',
@@ -25,16 +27,6 @@ function ReminderPageContent() {
       </h1>
       <ReminderForm initialData={initialData} />
     </div>
-  );
-}
-
-
-export default function PaymentRemindersPage() {
-  return (
-    // Suspense is required by Next.js when using useSearchParams at the page level
-    <Suspense fallback={<ReminderPageSkeleton />}>
-      <ReminderPageContent />
-    </Suspense>
   );
 }
 
@@ -59,5 +51,15 @@ function ReminderPageSkeleton() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentRemindersPage() {
+  return (
+    <AuthGuard allowedRoles={['admin']}> {/* Or ['student', 'admin'] if students can also access */}
+      <Suspense fallback={<ReminderPageSkeleton />}>
+        <ReminderPageCore />
+      </Suspense>
+    </AuthGuard>
   );
 }

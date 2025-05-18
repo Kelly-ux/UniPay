@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -6,8 +7,9 @@ import { DueCard } from '@/components/due-card';
 import type { Due } from '@/lib/mock-data';
 import { mockDues, uniqueSchools, uniqueDepartments, dueStatuses } from '@/lib/mock-data';
 import { Frown } from 'lucide-react';
+import { AuthGuard } from '@/components/auth-guard';
 
-export default function DuesDashboardPage() {
+function DuesDashboardContent() {
   const [filters, setFilters] = useState({
     school: 'all',
     department: 'all',
@@ -61,5 +63,13 @@ export default function DuesDashboardPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function DuesDashboardPage() {
+  return (
+    <AuthGuard allowedRoles={['student', 'admin']}>
+      <DuesDashboardContent />
+    </AuthGuard>
   );
 }

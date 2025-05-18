@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,45 +11,37 @@
     --card-foreground: 60 9.1% 97.8%;
     --popover: 20 14.3% 3.1%; /* Darker for popovers */
     --popover-foreground: 60 9.1% 97.8%;
-    --primary: 25 95.3% 54.1%; /* Fiery Orange */
+    --primary: 35 100% 60%; /* Brighter Orange */
     --primary-foreground: 20 14.3% 4.1%; /* Dark, for contrast on orange */
-    --secondary: 30 86.7% 50%; /* Warmer Orange/Red */
+    --secondary: 20 100% 55%; /* Another bright Orange/Red */
     --secondary-foreground: 60 9.1% 97.8%;
     --muted: 20 5.9% 15.1%; /* Dark gray, like soot */
     --muted-foreground: 60 5.1% 62.9%; /* Lighter gray for muted text */
-    --accent: 45 92.3% 54.7%; /* Bright Yellow/Gold, like sparks */
+    --accent: 50 100% 60%; /* Brighter Yellow/Gold */
     --accent-foreground: 20 14.3% 4.1%;
     --destructive: 0 72.2% 50.6%; /* Strong Red */
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 20 5.9% 20.1%; /* Dark gray border, slightly lighter */
     --input: 20 5.9% 15.1%;
-    --ring: 25 95.3% 54.1%; /* Fiery Orange for focus rings */
-    --chart-1: 25 95.3% 54.1%;
-    --chart-2: 30 86.7% 50%;
-    --chart-3: 45 92.3% 54.7%;
+    --ring: 35 100% 60%; /* Brighter Orange for focus rings */
+    --chart-1: 35 100% 60%;
+    --chart-2: 20 100% 55%;
+    --chart-3: 50 100% 60%;
     --chart-4: 0 72.2% 50.6%;
-    --chart-5: 200 50% 50%; /* A contrasting cool color if needed for charts */
+    --chart-5: 200 70% 60%; /* A contrasting cool color, brightened */
     --radius: 0.5rem;
 
     /* Sidebar specific variables */
-    --sidebar-background: 20 10% 7%; /* Slightly different from main background for distinction */
+    --sidebar-background: 20 10% 7%; 
     --sidebar-foreground: 60 9.1% 97.8%;
-    --sidebar-primary: 25 95.3% 54.1%; /* Fiery Orange */
+    --sidebar-primary: 35 100% 60%; 
     --sidebar-primary-foreground: 20 14.3% 4.1%;
-    --sidebar-accent: 30 86.7% 50%; /* Warmer Orange/Red */
+    --sidebar-accent: 20 100% 55%; 
     --sidebar-accent-foreground: 60 9.1% 97.8%;
     --sidebar-border: 20 5.9% 15.1%;
-    --sidebar-ring: 25 95.3% 54.1%;
+    --sidebar-ring: 35 100% 60%;
   }
 
-  /* 
-    The .dark class is not strictly necessary if dark is the default theme.
-    However, shadcn/ui components might rely on its presence for certain conditional styles.
-    For a "dark by default" theme, ensure the :root variables are set to dark values.
-    If you want a toggleable light/dark mode, you would define light theme variables in :root
-    and dark theme variables under .dark.
-    Given the "fire theme" seems to imply a dark aesthetic, we've set :root to dark values.
-  */
   .dark {
     --background: 20 14.3% 4.1%;
     --foreground: 60 9.1% 97.8%;
@@ -56,33 +49,33 @@
     --card-foreground: 60 9.1% 97.8%;
     --popover: 20 14.3% 3.1%;
     --popover-foreground: 60 9.1% 97.8%;
-    --primary: 25 95.3% 54.1%;
+    --primary: 35 100% 60%; 
     --primary-foreground: 20 14.3% 4.1%;
-    --secondary: 30 86.7% 50%;
+    --secondary: 20 100% 55%; 
     --secondary-foreground: 60 9.1% 97.8%;
     --muted: 20 5.9% 15.1%;
     --muted-foreground: 60 5.1% 62.9%;
-    --accent: 45 92.3% 54.7%;
+    --accent: 50 100% 60%;
     --accent-foreground: 20 14.3% 4.1%;
     --destructive: 0 72.2% 50.6%;
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 20 5.9% 20.1%;
     --input: 20 5.9% 15.1%;
-    --ring: 25 95.3% 54.1%;
-    --chart-1: 25 95.3% 54.1%;
-    --chart-2: 30 86.7% 50%;
-    --chart-3: 45 92.3% 54.7%;
+    --ring: 35 100% 60%;
+    --chart-1: 35 100% 60%;
+    --chart-2: 20 100% 55%;
+    --chart-3: 50 100% 60%;
     --chart-4: 0 72.2% 50.6%;
-    --chart-5: 200 50% 50%;
+    --chart-5: 200 70% 60%;
 
     --sidebar-background: 20 10% 7%;
     --sidebar-foreground: 60 9.1% 97.8%;
-    --sidebar-primary: 25 95.3% 54.1%;
+    --sidebar-primary: 35 100% 60%;
     --sidebar-primary-foreground: 20 14.3% 4.1%;
-    --sidebar-accent: 30 86.7% 50%;
+    --sidebar-accent: 20 100% 55%;
     --sidebar-accent-foreground: 60 9.1% 97.8%;
     --sidebar-border: 20 5.9% 15.1%;
-    --sidebar-ring: 25 95.3% 54.1%;
+    --sidebar-ring: 35 100% 60%;
   }
 }
 
@@ -92,6 +85,5 @@
   }
   body {
     @apply bg-background text-foreground;
-    /* font-family is handled by Next/Font in layout.tsx */
   }
 }
