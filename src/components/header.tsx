@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { AppLogo } from '@/components/app-logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Package2, UserCircle, LogOut, ShieldCheck, LogInIcon } from 'lucide-react';
+import { Menu, UserCircle, LogOut, ShieldCheck, LogInIcon, History, LayoutDashboard } from 'lucide-react'; // Added History, LayoutDashboard
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/auth-context';
@@ -20,19 +20,37 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const baseNavItems = [
-  { href: '/', label: 'Dues Dashboard' },
-  { href: '/reminders', label: 'Payment Reminders' },
+  { href: '/', label: 'Dues Dashboard', icon: LayoutDashboard },
 ];
+
+// Student specific nav items
+const studentNavItems = [
+  { href: '/payment-history', label: 'Payment History', icon: History },
+];
+
+// Admin specific nav items (to be shown in addition to base)
+const adminNavItems = [
+   { href: '/admin/generate-reminder', label: 'Generate Reminder', icon: Menu }, // Example, can refine icon
+   { href: '/admin', label: 'Admin Panel', icon: ShieldCheck },
+];
+
 
 export function Header() {
   const pathname = usePathname();
   const { user, logout, isLoading } = useAuth();
 
-  const navItems = user?.role === 'admin' 
-    ? [...baseNavItems, { href: '/admin', label: 'Admin Panel' }] // Placeholder for admin panel
-    : baseNavItems;
+  let navItems = [...baseNavItems];
+  if (user?.role === 'student') {
+    navItems = [...navItems, ...studentNavItems];
+  } else if (user?.role === 'admin') {
+    // Admins see base, and admin specific links. Admin panel itself is in dropdown.
+    // Let's add generate-reminder here too for admins.
+     navItems = [...navItems, ...adminNavItems.filter(item => item.href !== '/admin')]; // Exclude admin panel itself from main nav
+  }
+
 
   const getInitials = (name: string) => {
+    if (!name) return '??';
     const names = name.split(' ');
     if (names.length > 1) {
       return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
@@ -41,8 +59,9 @@ export function Header() {
   };
   
   return (
-    <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6 justify-between">
+    <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-card px-4 md:px-6 justify-between shadow-sm">
       <div className="flex items-center">
+        {/* Desktop Navigation */}
         <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
           <div className="flex items-center gap-2 text-lg font-semibold md:text-base mr-4">
             <AppLogo />
@@ -53,10 +72,11 @@ export function Header() {
               key={item.href}
               href={item.href}
               className={cn(
-                "transition-colors hover:text-foreground",
-                pathname === item.href ? "text-foreground font-semibold" : "text-muted-foreground"
+                "transition-colors hover:text-primary flex items-center gap-2",
+                pathname === item.href ? "text-primary font-semibold" : "text-muted-foreground"
               )}
             >
+              {item.icon && <item.icon className="h-4 w-4" />}
               {item.label}
             </Link>
           ))}
@@ -91,7 +111,7 @@ export function Header() {
               <DropdownMenuSeparator />
               {user.role === 'admin' && (
                  <DropdownMenuItem asChild>
-                    <Link href="/admin"> {/* Placeholder Link */}
+                    <Link href="/admin"> 
                       <ShieldCheck className="mr-2 h-4 w-4" />
                       Admin Panel
                     </Link>
@@ -124,7 +144,7 @@ export function Header() {
               <span className="sr-only">Toggle navigation menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="bg-background">
+          <SheetContent side="left" className="bg-card"> {/* Matched mobile sheet bg to card for consistency */}
             <nav className="grid gap-6 text-lg font-medium pt-8">
               <div className="flex items-center gap-2 text-lg font-semibold mb-4">
                 <AppLogo />
@@ -135,10 +155,11 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "transition-colors hover:text-foreground",
-                    pathname === item.href ? "text-foreground" : "text-muted-foreground"
+                    "transition-colors hover:text-primary flex items-center gap-2",
+                    pathname === item.href ? "text-primary font-semibold" : "text-muted-foreground"
                   )}
                 >
+                 {item.icon && <item.icon className="h-5 w-5" />}
                   {item.label}
                 </Link>
               ))}

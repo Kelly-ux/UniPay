@@ -21,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn(GeistSans.variable, "dark")} style={{colorScheme: 'dark'}}>
+    <html lang="en" className={cn(GeistSans.variable)} suppressHydrationWarning> {/* Removed "dark" class, added suppressHydrationWarning for theme changes */}
       <body className="antialiased bg-background text-foreground min-h-screen flex flex-col">
         <AuthProvider>
           <DuesProvider> {/* Added DuesProvider */}

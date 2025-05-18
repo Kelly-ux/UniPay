@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AuthGuard } from '@/components/auth-guard';
 import { useDues } from '@/contexts/dues-context';
-import { uniqueSchools, uniqueDepartments } from '@/lib/mock-data'; // For dropdowns
+import { uniqueSchools, uniqueDepartments } from '@/lib/mock-data'; 
 import { toast } from '@/hooks/use-toast';
 import { CalendarIcon, DollarSign, FilePlus, User, Building, SchoolIcon as SchoolLucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -45,7 +45,7 @@ function AddDueForm() {
       studentName: '',
       description: '',
       amount: 0,
-      dueDate: new Date(),
+      // dueDate: new Date(), // Default to today
       school: '',
       department: '',
       paymentMethodSuggestion: 'Online Portal',
@@ -60,7 +60,7 @@ function AddDueForm() {
       
       const dueDataForContext = {
         ...data,
-        dueDate: format(data.dueDate, 'yyyy-MM-dd'), // Format date for storage/context
+        dueDate: format(data.dueDate, 'yyyy-MM-dd'), 
       };
       addDue(dueDataForContext);
 
@@ -68,8 +68,8 @@ function AddDueForm() {
         title: 'Due Added Successfully!',
         description: `Due for ${data.studentName} (${data.description}) has been created.`,
       });
-      form.reset(); // Reset form after successful submission
-      router.push('/admin'); // Redirect to admin dashboard or dues list
+      form.reset(); 
+      router.push('/admin'); 
     } catch (error) {
       console.error('Failed to add due:', error);
       toast({
@@ -83,7 +83,7 @@ function AddDueForm() {
   };
 
   return (
-    <Card className="w-full max-w-3xl mx-auto shadow-2xl">
+    <Card className="w-full max-w-3xl mx-auto shadow-xl">
       <CardHeader>
         <div className="flex items-center gap-2 mb-2">
           <FilePlus className="h-8 w-8 text-primary" />
@@ -96,14 +96,14 @@ function AddDueForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Student Name */}
             <div className="space-y-2">
-              <Label htmlFor="studentName" className="flex items-center"><User className="mr-2 h-4 w-4" />Student Name</Label>
+              <Label htmlFor="studentName" className="flex items-center"><User className="mr-2 h-4 w-4 text-muted-foreground" />Student Name</Label>
               <Input id="studentName" placeholder="e.g., Jane Doe" {...form.register('studentName')} />
               {form.formState.errors.studentName && <p className="text-sm text-destructive">{form.formState.errors.studentName.message}</p>}
             </div>
 
             {/* Amount */}
             <div className="space-y-2">
-              <Label htmlFor="amount" className="flex items-center"><DollarSign className="mr-2 h-4 w-4" />Amount (USD)</Label>
+              <Label htmlFor="amount" className="flex items-center"><DollarSign className="mr-2 h-4 w-4 text-muted-foreground" />Amount (USD)</Label>
               <Input id="amount" type="number" step="0.01" placeholder="e.g., 150.50" {...form.register('amount')} />
               {form.formState.errors.amount && <p className="text-sm text-destructive">{form.formState.errors.amount.message}</p>}
             </div>
@@ -119,7 +119,7 @@ function AddDueForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* School */}
             <div className="space-y-2">
-              <Label htmlFor="school" className="flex items-center"><SchoolLucideIcon className="mr-2 h-4 w-4" />School</Label>
+              <Label htmlFor="school" className="flex items-center"><SchoolLucideIcon className="mr-2 h-4 w-4 text-muted-foreground" />School</Label>
               <Controller
                 name="school"
                 control={form.control}
@@ -139,7 +139,7 @@ function AddDueForm() {
 
             {/* Department */}
             <div className="space-y-2">
-              <Label htmlFor="department" className="flex items-center"><Building className="mr-2 h-4 w-4" />Department</Label>
+              <Label htmlFor="department" className="flex items-center"><Building className="mr-2 h-4 w-4 text-muted-foreground" />Department</Label>
                <Controller
                 name="department"
                 control={form.control}
@@ -160,7 +160,7 @@ function AddDueForm() {
 
           {/* Due Date */}
           <div className="space-y-2">
-            <Label htmlFor="dueDate" className="flex items-center"><CalendarIcon className="mr-2 h-4 w-4" />Due Date</Label>
+            <Label htmlFor="dueDate" className="flex items-center"><CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />Due Date</Label>
             <Controller
               name="dueDate"
               control={form.control}
@@ -175,7 +175,7 @@ function AddDueForm() {
                       {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0 bg-card"> {/* Ensure popover content also uses card bg for light theme */}
                     <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
                   </PopoverContent>
                 </Popover>
@@ -194,7 +194,7 @@ function AddDueForm() {
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -219,4 +219,3 @@ export default function AddDuePage() {
     </AuthGuard>
   );
 }
-
