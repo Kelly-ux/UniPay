@@ -5,6 +5,18 @@ import type { User } from '@/lib/types';
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+// Define the map at the module level for known student names in mock data
+const studentNameMap: Record<string, string> = {
+  "alice": "Alice Wonderland",
+  "bob": "Bob The Builder",
+  "charlie": "Charlie Brown",
+  "diana": "Diana Prince",
+  "edward": "Edward Scissorhands",
+  "fiona": "Fiona Gallagher",
+  "harry": "Harry Potter",
+  "hermione": "Hermione Granger",
+};
+
 interface AuthContextType {
   user: User | null;
   login: (userData: User) => void;
@@ -32,12 +44,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
   }, []);
 
-  const login = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem('uniPayUser', JSON.stringify(userData));
-    // Redirect based on role or to a specific page after login
-    if (userData.role === 'admin') {
-      router.push('/'); // Or an admin dashboard if it exists
+  const login = (userDataFromLoginPage: User) => {
+    // userDataFromLoginPage typically has 'name' as the email prefix
+    let userToStore = { ...userDataFromLoginPage }; // Create a mutable copy
+
+    if (userToStore.role === 'student') {
+      const emailPrefix = userToStore.email.split('@')[0].toLowerCase();
+      const mappedFullName = studentNameMap[emailPrefix];
+      if (mappedFullName) {
+        userToStore.name = mappedFullName; // Update name to full name if a mapping exists
+      }
+      // If no mapping, userToStore.name remains the email prefix from login page
+    }
+
+    setUser(userToStore);
+    localStorage.setItem('uniPayUser', JSON.stringify(userToStore));
+    
+    if (userToStore.role === 'admin') {
+      router.push('/'); 
     } else {
       router.push('/');
     }
