@@ -8,7 +8,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/header';
 import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/contexts/auth-context';
-import { DuesProvider } from '@/contexts/dues-context'; // Added DuesProvider
+import { DuesProvider } from '@/contexts/dues-context';
 
 export const metadata: Metadata = {
   title: 'UniPay - University Payment Management',
@@ -21,10 +21,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn(GeistSans.variable)} suppressHydrationWarning> {/* Removed "dark" class, added suppressHydrationWarning for theme changes */}
+    <html lang="en" className={cn(GeistSans.variable)} suppressHydrationWarning>
       <body className="antialiased bg-background text-foreground min-h-screen flex flex-col">
         <AuthProvider>
-          <DuesProvider> {/* Added DuesProvider */}
+          <DuesProvider>
             <Header />
             <main className="flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8">
               {children}
