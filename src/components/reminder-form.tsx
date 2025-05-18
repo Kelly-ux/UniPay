@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -20,7 +21,7 @@ import { CalendarIcon, Send, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface ReminderFormProps {
-  initialData?: Partial<ReminderFormValues & { dueDate?: string }>; // Allow string for initial dueDate from query
+  initialData?: Partial<ReminderFormValues & { dueDate?: string }>; 
 }
 
 export function ReminderForm({ initialData }: ReminderFormProps) {
@@ -37,6 +38,7 @@ export function ReminderForm({ initialData }: ReminderFormProps) {
       schoolName: initialData?.schoolName || '',
       departmentName: initialData?.departmentName || '',
       paymentMethod: initialData?.paymentMethod || '',
+      description: initialData?.description || '',
     },
   });
 
@@ -45,10 +47,11 @@ export function ReminderForm({ initialData }: ReminderFormProps) {
         form.reset({
             studentName: initialData.studentName || '',
             dueAmount: initialData.dueAmount || 0,
-            dueDate: initialData.dueDate ? new Date(initialData.dueDate) : new Date(), // Ensure Date object
+            dueDate: initialData.dueDate ? new Date(initialData.dueDate) : new Date(),
             schoolName: initialData.schoolName || '',
             departmentName: initialData.departmentName || '',
             paymentMethod: initialData.paymentMethod || '',
+            description: initialData.description || '',
         });
     }
   }, [initialData, form]);
@@ -61,8 +64,9 @@ export function ReminderForm({ initialData }: ReminderFormProps) {
 
     const inputForAI: GeneratePaymentReminderInput = {
       ...values,
-      userName: values.studentName, // Map studentName to userName as per AI schema
-      dueDate: format(values.dueDate, 'yyyy-MM-dd'), // Format date for AI
+      userName: values.studentName || undefined, // Pass undefined if empty string
+      dueDate: format(values.dueDate, 'yyyy-MM-dd'),
+      description: values.description || undefined,
     };
 
     try {
@@ -91,7 +95,7 @@ export function ReminderForm({ initialData }: ReminderFormProps) {
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl">Create Payment Reminder</CardTitle>
-          <CardDescription>Fill in the details to generate a personalized payment reminder using AI.</CardDescription>
+          <CardDescription>Fill in the details to generate a payment reminder using AI. Leave student name blank for a general departmental reminder.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -102,7 +106,7 @@ export function ReminderForm({ initialData }: ReminderFormProps) {
                   name="studentName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Student Name</FormLabel>
+                      <FormLabel>Student Name (Optional)</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., John Doe" {...field} />
                       </FormControl>
@@ -124,6 +128,19 @@ export function ReminderForm({ initialData }: ReminderFormProps) {
                   )}
                 />
               </div>
+               <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Due Description (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Fall Semester Lab Fee" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
               <FormField
                 control={form.control}

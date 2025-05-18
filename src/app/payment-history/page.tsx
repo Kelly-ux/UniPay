@@ -5,7 +5,7 @@ import React, { useMemo } from 'react';
 import { AuthGuard } from '@/components/auth-guard';
 import { useAuth } from '@/contexts/auth-context';
 import { useDues } from '@/contexts/dues-context';
-import type { Due } from '@/lib/mock-data';
+import type { Due } from '@/lib/mock-data'; // Due definition
 import {
   Table,
   TableHeader,
@@ -21,23 +21,34 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { History, DollarSign, CalendarDays, School, Building, FileText } from 'lucide-react';
 
+interface PaidDueEntry {
+  dueDefinition: Due;
+  paymentDate: string;
+}
+
 function PaymentHistoryContent() {
   const { user } = useAuth();
-  const { dues } = useDues();
+  const { dues: dueDefinitions, studentPayments, getDueById } = useDues();
 
-  const paidDues = useMemo(() => {
+  const paidDuesForStudent: PaidDueEntry[] = useMemo(() => {
     if (!user) return [];
-    return dues.filter(
-      (due) => due.status === 'Paid' && due.studentName === user.name // Assuming user.name matches due.studentName
-    ).sort((a, b) => new Date(b.paymentDate!).getTime() - new Date(a.paymentDate!).getTime()); // Sort by most recent payment
-  }, [user, dues]);
+    
+    return studentPayments
+      .filter(payment => payment.studentId === user.id)
+      .map(payment => {
+        const dueDefinition = getDueById(payment.dueId);
+        return dueDefinition ? { dueDefinition, paymentDate: payment.paymentDate } : null;
+      })
+      .filter((entry): entry is PaidDueEntry => entry !== null) // Type guard to filter out nulls
+      .sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()); // Sort by most recent payment
+
+  }, [user, studentPayments, getDueById]);
 
   const totalPaid = useMemo(() => {
-    return paidDues.reduce((sum, due) => sum + due.amount, 0);
-  }, [paidDues]);
+    return paidDuesForStudent.reduce((sum, entry) => sum + entry.dueDefinition.amount, 0);
+  }, [paidDuesForStudent]);
 
   if (!user) {
-    // This case should ideally be handled by AuthGuard, but as a fallback:
     return (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border p-12 text-center">
             <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
@@ -59,8 +70,8 @@ function PaymentHistoryContent() {
         <CardDescription>A record of all your completed payments, {user.name}.</CardDescription>
       </CardHeader>
       <CardContent>
-        {paidDues.length > 0 ? (
-          <ScrollArea className="h-[calc(100vh-20rem)]"> {/* Adjust height as needed */}
+        {paidDuesForStudent.length > 0 ? (
+          <ScrollArea className="h-[calc(100vh-20rem)]">
             <Table>
               <TableCaption>End of your payment history.</TableCaption>
               <TableHeader>
@@ -73,18 +84,18 @@ function PaymentHistoryContent() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paidDues.map((due) => (
-                  <TableRow key={due.id}>
-                    <TableCell className="font-medium">{due.description}</TableCell>
-                    <TableCell><School className="inline h-4 w-4 mr-1 text-muted-foreground"/>{due.school}</TableCell>
-                    <TableCell><Building className="inline h-4 w-4 mr-1 text-muted-foreground"/>{due.department}</TableCell>
+                {paidDuesForStudent.map((entry) => (
+                  <TableRow key={`${entry.dueDefinition.id}-${entry.paymentDate}`}>
+                    <TableCell className="font-medium">{entry.dueDefinition.description}</TableCell>
+                    <TableCell><School className="inline h-4 w-4 mr-1 text-muted-foreground"/>{entry.dueDefinition.school}</TableCell>
+                    <TableCell><Building className="inline h-4 w-4 mr-1 text-muted-foreground"/>{entry.dueDefinition.department}</TableCell>
                     <TableCell className="text-right">
                         <DollarSign className="inline h-4 w-4 mr-1 text-green-600"/>
-                        {due.amount.toFixed(2)}
+                        {entry.dueDefinition.amount.toFixed(2)}
                     </TableCell>
                     <TableCell className="text-center">
                         <CalendarDays className="inline h-4 w-4 mr-1 text-muted-foreground"/>
-                        {due.paymentDate ? new Date(due.paymentDate).toLocaleDateString() : 'N/A'}
+                        {new Date(entry.paymentDate).toLocaleDateString()}
                     </TableCell>
                   </TableRow>
                 ))}

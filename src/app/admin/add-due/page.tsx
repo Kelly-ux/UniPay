@@ -17,13 +17,13 @@ import { AuthGuard } from '@/components/auth-guard';
 import { useDues } from '@/contexts/dues-context';
 import { uniqueSchools, uniqueDepartments } from '@/lib/mock-data'; 
 import { toast } from '@/hooks/use-toast';
-import { CalendarIcon, DollarSign, FilePlus, User, Building, SchoolIcon as SchoolLucideIcon } from 'lucide-react';
+import { CalendarIcon, DollarSign, FilePlus, Building, SchoolIcon as SchoolLucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
 
+// Schema for adding a Due Definition
 const AddDueSchema = z.object({
-  studentName: z.string().min(1, 'Student name is required.'),
   description: z.string().min(3, 'Description must be at least 3 characters.'),
   amount: z.coerce.number().positive('Amount must be a positive number.'),
   dueDate: z.date({ required_error: 'Due date is required.' }),
@@ -42,10 +42,8 @@ function AddDueForm() {
   const form = useForm<AddDueFormValues>({
     resolver: zodResolver(AddDueSchema),
     defaultValues: {
-      studentName: '',
       description: '',
       amount: 0,
-      // dueDate: new Date(), // Default to today
       school: '',
       department: '',
       paymentMethodSuggestion: 'Online Portal',
@@ -58,22 +56,22 @@ function AddDueForm() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      const dueDataForContext = {
+      const dueDefinitionData = {
         ...data,
         dueDate: format(data.dueDate, 'yyyy-MM-dd'), 
       };
-      addDue(dueDataForContext);
+      addDue(dueDefinitionData); // addDue now takes Omit<Due, 'id'>
 
       toast({
-        title: 'Due Added Successfully!',
-        description: `Due for ${data.studentName} (${data.description}) has been created.`,
+        title: 'Due Definition Added!',
+        description: `Due for ${data.school} - ${data.department} (${data.description}) has been created.`,
       });
       form.reset(); 
       router.push('/admin'); 
     } catch (error) {
-      console.error('Failed to add due:', error);
+      console.error('Failed to add due definition:', error);
       toast({
-        title: 'Error Adding Due',
+        title: 'Error Adding Due Definition',
         description: 'An unexpected error occurred. Please try again.',
         variant: 'destructive',
       });
@@ -87,26 +85,17 @@ function AddDueForm() {
       <CardHeader>
         <div className="flex items-center gap-2 mb-2">
           <FilePlus className="h-8 w-8 text-primary" />
-          <CardTitle className="text-3xl font-bold">Add New Due</CardTitle>
+          <CardTitle className="text-3xl font-bold">Add New Due Definition</CardTitle>
         </div>
-        <CardDescription>Fill out the form below to create a new payment due for a student.</CardDescription>
+        <CardDescription>Fill out the form below to create a new payment due definition for a school/department.</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Student Name */}
-            <div className="space-y-2">
-              <Label htmlFor="studentName" className="flex items-center"><User className="mr-2 h-4 w-4 text-muted-foreground" />Student Name</Label>
-              <Input id="studentName" placeholder="e.g., Jane Doe" {...form.register('studentName')} />
-              {form.formState.errors.studentName && <p className="text-sm text-destructive">{form.formState.errors.studentName.message}</p>}
-            </div>
-
-            {/* Amount */}
-            <div className="space-y-2">
+          {/* Amount */}
+          <div className="space-y-2">
               <Label htmlFor="amount" className="flex items-center"><DollarSign className="mr-2 h-4 w-4 text-muted-foreground" />Amount (USD)</Label>
               <Input id="amount" type="number" step="0.01" placeholder="e.g., 150.50" {...form.register('amount')} />
               {form.formState.errors.amount && <p className="text-sm text-destructive">{form.formState.errors.amount.message}</p>}
-            </div>
           </div>
           
           {/* Description */}
@@ -175,7 +164,7 @@ function AddDueForm() {
                       {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-card"> {/* Ensure popover content also uses card bg for light theme */}
+                  <PopoverContent className="w-auto p-0 bg-card">
                     <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
                   </PopoverContent>
                 </Popover>
@@ -201,7 +190,7 @@ function AddDueForm() {
                 Adding Due...
               </>
             ) : (
-              'Add Due'
+              'Add Due Definition'
             )}
           </Button>
         </form>

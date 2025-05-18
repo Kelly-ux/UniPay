@@ -4,7 +4,7 @@
 import { Suspense } from 'react';
 import { ReminderForm } from '@/components/reminder-form';
 import { useSearchParams } from 'next/navigation';
-import type { ReminderFormValues } from '@/lib/schemas';
+import type { ReminderFormValues } from '@/lib/schemas'; // ReminderFormValues might need an update if studentName is optional
 import { Skeleton } from "@/components/ui/skeleton";
 import { AuthGuard } from '@/components/auth-guard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -13,13 +13,19 @@ import { Bot } from 'lucide-react';
 function GenerateReminderPageCore() {
   const searchParams = useSearchParams();
 
-  const initialData: Partial<ReminderFormValues & { dueDate?: string }> = {
-    studentName: searchParams.get('studentName') || '',
+  // studentName is now optional for the AI flow.
+  // The form itself might still require it if it's for a specific student,
+  // or it could be made optional in ReminderFormSchema too.
+  // For now, keeping ReminderFormSchema as is, but AI flow handles optional studentName.
+  // The link from DueCard now omits studentName, so it will be empty here.
+  const initialData: Partial<ReminderFormValues & { dueDate?: string, description?: string }> = {
+    studentName: searchParams.get('studentName') || '', // Will be empty if coming from new DueCard link
     dueAmount: searchParams.get('dueAmount') ? parseFloat(searchParams.get('dueAmount')!) : undefined,
     dueDate: searchParams.get('dueDate') ? new Date(searchParams.get('dueDate')!) : undefined,
     schoolName: searchParams.get('schoolName') || '',
     departmentName: searchParams.get('departmentName') || '',
     paymentMethod: searchParams.get('paymentMethod') || '',
+    description: searchParams.get('description') || '', // Added description
   };
   
   return (
@@ -30,7 +36,8 @@ function GenerateReminderPageCore() {
           <CardTitle className="text-3xl font-bold">AI Payment Reminder Generator</CardTitle>
         </div>
         <CardDescription>
-          Use this tool to generate personalized payment reminders for students. The form can be pre-filled by clicking &quot;Generate Reminder&quot; on a due card.
+          Use this tool to generate payment reminders. The form can be pre-filled by clicking &quot;Generate Reminder&quot; on a due card.
+          If Student Name is left blank, a general reminder for the department will be generated.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -55,7 +62,8 @@ function GenerateReminderPageSkeleton() {
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-full" />
             </div>
-            <Skeleton className="h-10 w-full" /> {/* Date Picker Skeleton */}
+            <Skeleton className="h-10 w-full" /> 
+            <Skeleton className="h-10 w-full" /> {/* Description Skeleton */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-full" />

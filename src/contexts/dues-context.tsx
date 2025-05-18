@@ -1,57 +1,101 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
-import type { Due, DueStatus } from '@/lib/mock-data';
-import { mockDuesInitial } from '@/lib/mock-data'; // Renamed import
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import type { Due } from '@/lib/mock-data'; // Due definition
+import { mockDuesInitial } from '@/lib/mock-data';
 import { format } from 'date-fns';
 
+export interface StudentPayment {
+  studentId: string; // User ID
+  dueId: string;     // Due definition ID
+  paymentDate: string; // YYYY-MM-DD
+}
+
 interface DuesContextType {
-  dues: Due[];
-  addDue: (newDue: Omit<Due, 'id' | 'status' | 'paymentDate'>) => void;
-  updateDueStatus: (dueId: string, status: DueStatus, paymentDate?: Date) => void;
+  dues: Due[]; // Due definitions
+  studentPayments: StudentPayment[];
+  addDue: (newDueData: Omit<Due, 'id'>) => void; // Admin adds a due definition
+  recordStudentPayment: (dueId: string, studentId: string) => void;
+  hasStudentPaid: (dueId: string, studentId: string) => boolean;
+  getStudentPaymentDate: (dueId: string, studentId: string) => string | undefined;
   getDueById: (dueId: string) => Due | undefined;
 }
 
 const DuesContext = createContext<DuesContextType | undefined>(undefined);
 
-export const DuesProvider = ({ children }: { children: ReactNode }) => {
-  const [dues, setDues] = useState<Due[]>(mockDuesInitial);
+const DUES_DEFINITIONS_STORAGE_KEY = 'uniPayDuesDefinitions';
+const STUDENT_PAYMENTS_STORAGE_KEY = 'uniPayStudentPayments';
 
-  const addDue = useCallback((newDueData: Omit<Due, 'id' | 'status' | 'paymentDate'>) => {
+
+export const DuesProvider = ({ children }: { children: ReactNode }) => {
+  const [dues, setDues] = useState<Due[]>(() => {
+    if (typeof window !== 'undefined') {
+      const savedDues = localStorage.getItem(DUES_DEFINITIONS_STORAGE_KEY);
+      return savedDues ? JSON.parse(savedDues) : mockDuesInitial;
+    }
+    return mockDuesInitial;
+  });
+
+  const [studentPayments, setStudentPayments] = useState<StudentPayment[]>(() => {
+     if (typeof window !== 'undefined') {
+      const savedPayments = localStorage.getItem(STUDENT_PAYMENTS_STORAGE_KEY);
+      return savedPayments ? JSON.parse(savedPayments) : [];
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem(DUES_DEFINITIONS_STORAGE_KEY, JSON.stringify(dues));
+  }, [dues]);
+
+  useEffect(() => {
+    localStorage.setItem(STUDENT_PAYMENTS_STORAGE_KEY, JSON.stringify(studentPayments));
+  }, [studentPayments]);
+
+
+  const addDue = useCallback((newDueData: Omit<Due, 'id'>) => {
     setDues((prevDues) => {
       const newId = (Math.max(0, ...prevDues.map(d => parseInt(d.id, 10))) + 1).toString();
-      const dueWithDefaults: Due = {
+      const dueDefinition: Due = {
         ...newDueData,
         id: newId,
-        status: new Date(newDueData.dueDate) < new Date() && !newDueData.dueDate.endsWith('T00:00:00.000Z') // Basic overdue check
-          ? 'Overdue' 
-          : 'Unpaid',
       };
-      return [...prevDues, dueWithDefaults];
+      return [...prevDues, dueDefinition];
     });
   }, []);
 
-  const updateDueStatus = useCallback((dueId: string, status: DueStatus, paymentDateValue?: Date) => {
-    setDues((prevDues) =>
-      prevDues.map((due) =>
-        due.id === dueId
-          ? {
-              ...due,
-              status,
-              paymentDate: paymentDateValue ? format(paymentDateValue, 'yyyy-MM-dd') : due.paymentDate,
-            }
-          : due
-      )
-    );
+  const recordStudentPayment = useCallback((dueId: string, studentId: string) => {
+    setStudentPayments((prevPayments) => {
+      // Avoid duplicate payments by the same student for the same due
+      if (prevPayments.some(p => p.dueId === dueId && p.studentId === studentId)) {
+        return prevPayments;
+      }
+      const newPayment: StudentPayment = {
+        dueId,
+        studentId,
+        paymentDate: format(new Date(), 'yyyy-MM-dd'),
+      };
+      return [...prevPayments, newPayment];
+    });
   }, []);
+
+  const hasStudentPaid = useCallback((dueId: string, studentId: string): boolean => {
+    return studentPayments.some(p => p.dueId === dueId && p.studentId === studentId);
+  }, [studentPayments]);
+
+  const getStudentPaymentDate = useCallback((dueId: string, studentId: string): string | undefined => {
+    const payment = studentPayments.find(p => p.dueId === dueId && p.studentId === studentId);
+    return payment?.paymentDate;
+  }, [studentPayments]);
+
 
   const getDueById = useCallback((dueId: string) => {
     return dues.find(due => due.id === dueId);
   }, [dues]);
 
   return (
-    <DuesContext.Provider value={{ dues, addDue, updateDueStatus, getDueById }}>
+    <DuesContext.Provider value={{ dues, studentPayments, addDue, recordStudentPayment, hasStudentPaid, getStudentPaymentDate, getDueById }}>
       {children}
     </DuesContext.Provider>
   );
