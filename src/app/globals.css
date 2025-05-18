@@ -11,22 +11,22 @@
     --card-foreground: 60 9.1% 97.8%;
     --popover: 20 14.3% 3.1%; /* Darker for popovers */
     --popover-foreground: 60 9.1% 97.8%;
-    --primary: 35 100% 60%; /* Brighter Orange */
+    --primary: 35 100% 65%; /* Brighter Orange - Increased Lightness */
     --primary-foreground: 20 14.3% 4.1%; /* Dark, for contrast on orange */
-    --secondary: 20 100% 55%; /* Another bright Orange/Red */
+    --secondary: 20 100% 60%; /* Another bright Orange/Red - Increased Lightness */
     --secondary-foreground: 60 9.1% 97.8%;
     --muted: 20 5.9% 15.1%; /* Dark gray, like soot */
     --muted-foreground: 60 5.1% 62.9%; /* Lighter gray for muted text */
-    --accent: 50 100% 60%; /* Brighter Yellow/Gold */
+    --accent: 50 100% 65%; /* Brighter Yellow/Gold - Increased Lightness */
     --accent-foreground: 20 14.3% 4.1%;
     --destructive: 0 72.2% 50.6%; /* Strong Red */
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 20 5.9% 20.1%; /* Dark gray border, slightly lighter */
     --input: 20 5.9% 15.1%;
-    --ring: 35 100% 60%; /* Brighter Orange for focus rings */
-    --chart-1: 35 100% 60%;
-    --chart-2: 20 100% 55%;
-    --chart-3: 50 100% 60%;
+    --ring: 35 100% 65%; /* Brighter Orange for focus rings - Matched primary */
+    --chart-1: 35 100% 65%;
+    --chart-2: 20 100% 60%;
+    --chart-3: 50 100% 65%;
     --chart-4: 0 72.2% 50.6%;
     --chart-5: 200 70% 60%; /* A contrasting cool color, brightened */
     --radius: 0.5rem;
@@ -34,12 +34,12 @@
     /* Sidebar specific variables */
     --sidebar-background: 20 10% 7%; 
     --sidebar-foreground: 60 9.1% 97.8%;
-    --sidebar-primary: 35 100% 60%; 
+    --sidebar-primary: 35 100% 65%; 
     --sidebar-primary-foreground: 20 14.3% 4.1%;
-    --sidebar-accent: 20 100% 55%; 
+    --sidebar-accent: 20 100% 60%; 
     --sidebar-accent-foreground: 60 9.1% 97.8%;
     --sidebar-border: 20 5.9% 15.1%;
-    --sidebar-ring: 35 100% 60%;
+    --sidebar-ring: 35 100% 65%;
   }
 
   .dark {
@@ -49,33 +49,33 @@
     --card-foreground: 60 9.1% 97.8%;
     --popover: 20 14.3% 3.1%;
     --popover-foreground: 60 9.1% 97.8%;
-    --primary: 35 100% 60%; 
+    --primary: 35 100% 65%; /* Brighter Orange - Increased Lightness */
     --primary-foreground: 20 14.3% 4.1%;
-    --secondary: 20 100% 55%; 
+    --secondary: 20 100% 60%; /* Another bright Orange/Red - Increased Lightness */
     --secondary-foreground: 60 9.1% 97.8%;
     --muted: 20 5.9% 15.1%;
     --muted-foreground: 60 5.1% 62.9%;
-    --accent: 50 100% 60%;
+    --accent: 50 100% 65%; /* Brighter Yellow/Gold - Increased Lightness */
     --accent-foreground: 20 14.3% 4.1%;
     --destructive: 0 72.2% 50.6%;
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 20 5.9% 20.1%;
     --input: 20 5.9% 15.1%;
-    --ring: 35 100% 60%;
-    --chart-1: 35 100% 60%;
-    --chart-2: 20 100% 55%;
-    --chart-3: 50 100% 60%;
+    --ring: 35 100% 65%; /* Brighter Orange for focus rings - Matched primary */
+    --chart-1: 35 100% 65%;
+    --chart-2: 20 100% 60%;
+    --chart-3: 50 100% 65%;
     --chart-4: 0 72.2% 50.6%;
     --chart-5: 200 70% 60%;
 
     --sidebar-background: 20 10% 7%;
     --sidebar-foreground: 60 9.1% 97.8%;
-    --sidebar-primary: 35 100% 60%;
+    --sidebar-primary: 35 100% 65%;
     --sidebar-primary-foreground: 20 14.3% 4.1%;
-    --sidebar-accent: 20 100% 55%;
+    --sidebar-accent: 20 100% 60%;
     --sidebar-accent-foreground: 60 9.1% 97.8%;
     --sidebar-border: 20 5.9% 15.1%;
-    --sidebar-ring: 35 100% 60%;
+    --sidebar-ring: 35 100% 65%;
   }
 }
 
