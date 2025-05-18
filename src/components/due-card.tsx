@@ -5,7 +5,7 @@ import type { Due, DueStatus } from '@/lib/mock-data'; // Due is now a DueDefini
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, CheckCircle2, DollarSign, Info, Mail, School, Building, CalendarDays, CreditCard } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, DollarSign, Info, Mail, School, Building, CalendarDays, CreditCard, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -14,6 +14,7 @@ import { useDues } from '@/contexts/dues-context';
 import React, { useState, useMemo } from 'react';
 import { ReceiptModal } from './receipt-modal';
 import { toast } from '@/hooks/use-toast';
+import { format } from 'date-fns'; // For receipt modal fallback
 
 interface DueCardProps {
   due: Due; // This is a Due Definition
@@ -28,10 +29,9 @@ const statusStyles: Record<DueStatus, { icon: React.ElementType; badgeVariant: '
 
 export function DueCard({ due }: DueCardProps) {
   const { user } = useAuth();
-  const { recordStudentPayment, hasStudentPaid, getStudentPaymentDate, getDueById } = useDues();
+  const { recordStudentPayment, hasStudentPaid, getStudentPaymentDate, removeDue } = useDues();
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   
-  // State to hold the studentName for the receipt, captured at payment time
   const [receiptStudentName, setReceiptStudentName] = useState<string | null>(null);
   const [receiptDueDetails, setReceiptDueDetails] = useState<Due | null>(null);
 
@@ -48,19 +48,17 @@ export function DueCard({ due }: DueCardProps) {
 
   const currentStatus: DueStatus = useMemo(() => {
     if (studentHasPaid) return 'Paid';
-    if (new Date(due.dueDate) < new Date() && !due.dueDate.endsWith('T00:00:00.000Z')) return 'Overdue'; // Ensure correct date comparison
+    // Ensure correct date comparison. Dates from mock data are YYYY-MM-DD.
+    // Create Date objects at midnight UTC to compare consistently.
+    const today = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
+    const dueDate = new Date(due.dueDate + 'T00:00:00.000Z');
+    if (dueDate < today) return 'Overdue';
     return 'Unpaid';
   }, [studentHasPaid, due.dueDate]);
 
   const { icon: StatusIcon, badgeVariant, textColorClass, iconColorClass, badgeBgClass } = statusStyles[currentStatus];
   const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(due.amount);
   
-  // Reminder link needs studentName - this is problematic if due is departmental.
-  // For admin "Generate Reminder" button, they might need to pick a student or it generates a generic reminder.
-  // Let's make the reminder generic for now, or remove studentName from query param.
-  // A department-wide reminder might be more appropriate.
-  // For now, the existing reminder AI flow expects a student name. We can pass a placeholder or modify the flow.
-  // Let's pass the Department and School instead of a specific student.
   const reminderLink = `/admin/generate-reminder?dueAmount=${due.amount}&dueDate=${due.dueDate}&schoolName=${encodeURIComponent(due.school)}&departmentName=${encodeURIComponent(due.department)}&paymentMethod=${encodeURIComponent(due.paymentMethodSuggestion || 'University Payment Portal')}&description=${encodeURIComponent(due.description)}`;
 
 
@@ -70,17 +68,23 @@ export function DueCard({ due }: DueCardProps) {
       return;
     }
     // Simulate payment
-    await new Promise(resolve => setTimeout(resolve, 500)); 
+    await new Promise(resolve => setTimeout(resolve, 100)); 
     recordStudentPayment(due.id, user.id);
     
-    setReceiptStudentName(user.name); // Capture current user's name for the receipt
-    setReceiptDueDetails(due); // Set the current due details for the receipt
+    setReceiptStudentName(user.name); 
+    setReceiptDueDetails(due); 
     setIsReceiptModalOpen(true);
 
     toast({
       title: "Payment Successful!",
       description: `Payment for "${due.description}" has been processed by ${user.name}.`,
     });
+  };
+
+  const handleRemoveDue = () => {
+    // In a real app, you'd want a confirmation dialog here
+    removeDue(due.id);
+    // Toast notification is handled within the removeDue context function
   };
 
   return (
@@ -118,19 +122,18 @@ export function DueCard({ due }: DueCardProps) {
           </div>
           <div className="flex items-center text-sm text-muted-foreground">
             <CalendarDays className="mr-1 h-4 w-4" />
-            Due: {new Date(due.dueDate).toLocaleDateString()}
+            Due: {new Date(due.dueDate + 'T00:00:00.000Z').toLocaleDateString()}
           </div>
-          {/* Removed studentName display from here as due is departmental */}
           {currentStatus === 'Paid' && paymentDateForStudent && (
             <div className="flex items-center text-sm text-green-600 font-medium">
               <CheckCircle2 className="mr-1 h-4 w-4" />
-              You paid on: {new Date(paymentDateForStudent).toLocaleDateString()}
+              You paid on: {new Date(paymentDateForStudent + 'T00:00:00.000Z').toLocaleDateString()}
             </div>
           )}
         </CardContent>
-        <CardFooter className="pt-3 pb-4 space-x-2 border-t mt-auto">
+        <CardFooter className="pt-3 pb-4 space-x-2 border-t mt-auto flex flex-wrap gap-2">
           {user?.role === 'student' && currentStatus !== 'Paid' && (
-            <Button onClick={handlePayNow} size="sm" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Button onClick={handlePayNow} size="sm" className="flex-1 basis-full sm:basis-auto bg-primary hover:bg-primary/90 text-primary-foreground">
               <CreditCard className="mr-2 h-4 w-4" />
               Pay Now
             </Button>
@@ -144,18 +147,29 @@ export function DueCard({ due }: DueCardProps) {
                 }} 
                 size="sm" 
                 variant="outline" 
-                className="w-full text-green-600 border-green-500 hover:bg-green-50 hover:text-green-700"
+                className="flex-1 basis-full sm:basis-auto text-green-600 border-green-500 hover:bg-green-50 hover:text-green-700"
             >
               View My Receipt
             </Button>
           )}
-          {(user?.role === 'admin') && (
-            <Button asChild variant="outline" size="sm" className="w-full hover:bg-accent hover:text-accent-foreground border-primary/50 text-primary hover:border-primary">
-              <Link href={reminderLink}>
-                <Mail className="mr-2 h-4 w-4" />
-                Generate Reminder
-              </Link>
-            </Button>
+          {user?.role === 'admin' && (
+            <>
+              <Button asChild variant="outline" size="sm" className="flex-1 basis-full sm:basis-auto hover:bg-accent hover:text-accent-foreground border-primary/50 text-primary hover:border-primary">
+                <Link href={reminderLink}>
+                  <Mail className="mr-2 h-4 w-4" />
+                  Generate Reminder
+                </Link>
+              </Button>
+              <Button 
+                onClick={handleRemoveDue} 
+                variant="destructive" 
+                size="sm" 
+                className="flex-1 basis-full sm:basis-auto"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Remove Due
+              </Button>
+            </>
           )}
         </CardFooter>
       </Card>
@@ -169,7 +183,7 @@ export function DueCard({ due }: DueCardProps) {
           }} 
           due={receiptDueDetails} 
           studentName={receiptStudentName}
-          paymentDate={paymentDateForStudent || format(new Date(), 'yyyy-MM-dd')} // Fallback if somehow not set
+          paymentDate={paymentDateForStudent || format(new Date(), 'yyyy-MM-dd')}
         />
       )}
     </>

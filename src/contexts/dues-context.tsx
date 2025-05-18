@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, ReactNode, useCallback, use
 import type { Due } from '@/lib/mock-data'; // Due definition
 import { mockDuesInitial } from '@/lib/mock-data';
 import { format } from 'date-fns';
+import { toast } from '@/hooks/use-toast';
 
 export interface StudentPayment {
   studentId: string; // User ID
@@ -16,6 +17,7 @@ interface DuesContextType {
   dues: Due[]; // Due definitions
   studentPayments: StudentPayment[];
   addDue: (newDueData: Omit<Due, 'id'>) => void; // Admin adds a due definition
+  removeDue: (dueId: string) => void; // Admin removes a due definition
   recordStudentPayment: (dueId: string, studentId: string) => void;
   hasStudentPaid: (dueId: string, studentId: string) => boolean;
   getStudentPaymentDate: (dueId: string, studentId: string) => string | undefined;
@@ -32,7 +34,13 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
   const [dues, setDues] = useState<Due[]>(() => {
     if (typeof window !== 'undefined') {
       const savedDues = localStorage.getItem(DUES_DEFINITIONS_STORAGE_KEY);
-      return savedDues ? JSON.parse(savedDues) : mockDuesInitial;
+      try {
+        return savedDues ? JSON.parse(savedDues) : mockDuesInitial;
+      } catch (e) {
+        console.error("Failed to parse dues from localStorage", e);
+        localStorage.removeItem(DUES_DEFINITIONS_STORAGE_KEY); // Clear corrupted data
+        return mockDuesInitial;
+      }
     }
     return mockDuesInitial;
   });
@@ -40,23 +48,33 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
   const [studentPayments, setStudentPayments] = useState<StudentPayment[]>(() => {
      if (typeof window !== 'undefined') {
       const savedPayments = localStorage.getItem(STUDENT_PAYMENTS_STORAGE_KEY);
-      return savedPayments ? JSON.parse(savedPayments) : [];
+      try {
+        return savedPayments ? JSON.parse(savedPayments) : [];
+      } catch (e) {
+        console.error("Failed to parse student payments from localStorage", e);
+        localStorage.removeItem(STUDENT_PAYMENTS_STORAGE_KEY); // Clear corrupted data
+        return [];
+      }
     }
     return [];
   });
 
   useEffect(() => {
-    localStorage.setItem(DUES_DEFINITIONS_STORAGE_KEY, JSON.stringify(dues));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(DUES_DEFINITIONS_STORAGE_KEY, JSON.stringify(dues));
+    }
   }, [dues]);
 
   useEffect(() => {
-    localStorage.setItem(STUDENT_PAYMENTS_STORAGE_KEY, JSON.stringify(studentPayments));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STUDENT_PAYMENTS_STORAGE_KEY, JSON.stringify(studentPayments));
+    }
   }, [studentPayments]);
 
 
   const addDue = useCallback((newDueData: Omit<Due, 'id'>) => {
     setDues((prevDues) => {
-      const newId = (Math.max(0, ...prevDues.map(d => parseInt(d.id, 10))) + 1).toString();
+      const newId = (Math.max(0, ...prevDues.map(d => parseInt(d.id, 10) || 0)) + 1).toString();
       const dueDefinition: Due = {
         ...newDueData,
         id: newId,
@@ -65,9 +83,21 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
+  const removeDue = useCallback((dueIdToRemove: string) => {
+    const dueToRemove = dues.find(d => d.id === dueIdToRemove);
+    setDues((prevDues) => prevDues.filter(due => due.id !== dueIdToRemove));
+    // Also remove any student payments associated with this due
+    setStudentPayments((prevPayments) => prevPayments.filter(payment => payment.dueId !== dueIdToRemove));
+    if (dueToRemove) {
+        toast({
+            title: "Due Removed",
+            description: `The due "${dueToRemove.description}" has been successfully removed.`,
+        });
+    }
+  }, [dues]);
+
   const recordStudentPayment = useCallback((dueId: string, studentId: string) => {
     setStudentPayments((prevPayments) => {
-      // Avoid duplicate payments by the same student for the same due
       if (prevPayments.some(p => p.dueId === dueId && p.studentId === studentId)) {
         return prevPayments;
       }
@@ -95,7 +125,7 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
   }, [dues]);
 
   return (
-    <DuesContext.Provider value={{ dues, studentPayments, addDue, recordStudentPayment, hasStudentPaid, getStudentPaymentDate, getDueById }}>
+    <DuesContext.Provider value={{ dues, studentPayments, addDue, removeDue, recordStudentPayment, hasStudentPaid, getStudentPaymentDate, getDueById }}>
       {children}
     </DuesContext.Provider>
   );
