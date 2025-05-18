@@ -44,13 +44,10 @@ export function Header() {
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6 justify-between">
       <div className="flex items-center">
         <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-lg font-semibold md:text-base mr-4"
-          >
+          <div className="flex items-center gap-2 text-lg font-semibold md:text-base mr-4">
             <AppLogo />
             <span className="sr-only">UniPay</span>
-          </Link>
+          </div>
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -129,13 +126,10 @@ export function Header() {
           </SheetTrigger>
           <SheetContent side="left" className="bg-background">
             <nav className="grid gap-6 text-lg font-medium pt-8">
-              <Link
-                href="/"
-                className="flex items-center gap-2 text-lg font-semibold mb-4"
-              >
+              <div className="flex items-center gap-2 text-lg font-semibold mb-4">
                 <AppLogo />
                 <span className="sr-only">UniPay</span>
-              </Link>
+              </div>
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -155,3 +149,4 @@ export function Header() {
     </header>
   );
 }
+
