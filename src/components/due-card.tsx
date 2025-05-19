@@ -66,7 +66,7 @@ export function DueCard({ due }: DueCardProps) {
   const { icon: StatusIcon, badgeVariant, textColorClass, iconColorClass, badgeBgClass } = statusStyles[currentStatus];
   const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(due.amount);
   
-  const reminderLink = \`/admin/generate-reminder?dueAmount=\${due.amount}&dueDate=\${due.dueDate}&schoolName=\${encodeURIComponent(due.school)}&departmentName=\${encodeURIComponent(due.department)}&paymentMethod=\${encodeURIComponent(due.paymentMethodSuggestion || 'University Payment Portal')}&description=\${encodeURIComponent(due.description)}\`;
+  const reminderLink = `/admin/generate-reminder?dueAmount=${due.amount}&dueDate=${due.dueDate}&schoolName=${encodeURIComponent(due.school)}&departmentName=${encodeURIComponent(due.department)}&paymentMethod=${encodeURIComponent(due.paymentMethodSuggestion || 'University Payment Portal')}&description=${encodeURIComponent(due.description)}`;
 
 
   const handlePayNow = async () => {
@@ -82,7 +82,7 @@ export function DueCard({ due }: DueCardProps) {
 
     toast({
       title: "Payment Successful!",
-      description: \`Payment for "\${due.description}" has been processed by \${user.name}.\`,
+      description: `Payment for "${due.description}" has been processed by ${user.name}.`,
     });
   };
 
@@ -100,8 +100,8 @@ export function DueCard({ due }: DueCardProps) {
       <Card className="flex flex-col h-full shadow-lg hover:shadow-primary/10 transition-shadow duration-300 bg-card text-card-foreground overflow-hidden border border-border rounded-xl">
         <div className="relative w-full h-40">
           <Image 
-            src={\`https://placehold.co/600x240.png\`}
-            alt={\`\${due.school} \${due.department}\`}
+            src={`https://placehold.co/600x240.png`}
+            alt={`${due.school} ${due.department}`}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover"

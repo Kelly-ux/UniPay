@@ -21,7 +21,7 @@ export function ReceiptModal({ isOpen, onClose, due, studentName, paymentDate }:
 
   const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(due.amount);
   const displayPaymentDate = paymentDate ? new Date(paymentDate + 'T00:00:00.000Z').toLocaleDateString() : 'N/A';
-  const transactionId = \`MOCK-\${due.id}-\${paymentDate ? new Date(paymentDate + 'T00:00:00.000Z').getTime() : new Date().getTime()}\`;
+  const transactionId = `MOCK-${due.id}-${paymentDate ? new Date(paymentDate + 'T00:00:00.000Z').getTime() : new Date().getTime()}`;
 
   const handleDownloadPdf = () => {
     const doc = new jsPDF();
@@ -35,26 +35,26 @@ export function ReceiptModal({ isOpen, onClose, due, studentName, paymentDate }:
     let yPos = 40;
     const lineHeight = 7;
 
-    doc.text(\`Receipt For: \${due.description}\`, 10, yPos);
+    doc.text(`Receipt For: ${due.description}`, 10, yPos);
     yPos += lineHeight;
-    doc.text(\`Student Name: \${studentName}\`, 10, yPos);
+    doc.text(`Student Name: ${studentName}`, 10, yPos);
     yPos += lineHeight;
-    doc.text(\`School: \${due.school}\`, 10, yPos);
+    doc.text(`School: ${due.school}`, 10, yPos);
     yPos += lineHeight;
-    doc.text(\`Department: \${due.department}\`, 10, yPos);
+    doc.text(`Department: ${due.department}`, 10, yPos);
     yPos += lineHeight;
-    doc.text(\`Amount Paid: \${formattedAmount}\`, 10, yPos);
+    doc.text(`Amount Paid: ${formattedAmount}`, 10, yPos);
     yPos += lineHeight;
-    doc.text(\`Payment Date: \${displayPaymentDate}\`, 10, yPos);
+    doc.text(`Payment Date: ${displayPaymentDate}`, 10, yPos);
     yPos += lineHeight;
-    doc.text(\`Transaction ID: \${transactionId}\`, 10, yPos);
+    doc.text(`Transaction ID: ${transactionId}`, 10, yPos);
     yPos += lineHeight * 2;
     
     doc.text("--------------------------------------------------------------------------------------------------", 10, yPos);
     yPos += lineHeight;
     doc.text("Thank you for your payment!", 105, yPos, { align: "center" });
 
-    doc.save(\`UniPay_Receipt_\${studentName.replace(/\\s+/g, '_')}_\${due.id}.pdf\`);
+    doc.save(`UniPay_Receipt_${studentName.replace(/\s+/g, '_')}_${due.id}.pdf`);
   };
 
   return (

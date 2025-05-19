@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const mappedFullName = studentNameMap[emailPrefix];
       if (mappedFullName) {
         userToStore.name = mappedFullName;
-        userToStore.id = \`mock-student-\${emailPrefix}\`; // Assign predictable ID
+        userToStore.id = `mock-student-${emailPrefix}`; // Assign predictable ID
       } else {
         // For students not in the map, keep generic ID but still try to make a name
         userToStore.name = userToStore.name || emailPrefix; // Keep provided name or use prefix
@@ -85,3 +85,4 @@ export const useAuth = () => {
   }
   return context;
 };
+
