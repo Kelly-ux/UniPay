@@ -20,10 +20,35 @@ export function ReceiptModal({ isOpen, onClose, due, studentName, paymentDate }:
   if (!due) return null;
 
   const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(due.amount);
-  const displayPaymentDate = paymentDate ? new Date(paymentDate + 'T00:00:00').toLocaleDateString() : 'N/A'; // Ensure correct parsing for local date string
+  const displayPaymentDate = paymentDate ? new Date(paymentDate + 'T00:00:00.000Z').toLocaleDateString() : 'N/A'; // Use UTC to avoid timezone issues
+  const transactionId = `MOCK-${due.id}-${paymentDate ? new Date(paymentDate + 'T00:00:00.000Z').getTime() : new Date().getTime()}`;
 
-  const handlePrint = () => {
-    alert("Printing/Downloading receipt... (This is a mock function)");
+  const generateReceiptContent = () => {
+    return `
+Payment Receipt
+---------------------------------
+Receipt For: ${due.description}
+Student Name: ${studentName}
+School: ${due.school}
+Department: ${due.department}
+Amount Paid: ${formattedAmount}
+Payment Date: ${displayPaymentDate}
+Transaction ID: ${transactionId}
+---------------------------------
+Thank you for your payment!
+    `;
+  };
+
+  const handleDownload = () => {
+    const receiptText = generateReceiptContent();
+    const blob = new Blob([receiptText.trim()], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `UniPay_Receipt_${studentName.replace(/\s+/g, '_')}_${due.id}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href); // Clean up
   };
 
   return (
@@ -61,14 +86,13 @@ export function ReceiptModal({ isOpen, onClose, due, studentName, paymentDate }:
           </div>
           <div>
             <h4 className="font-semibold">Transaction ID:</h4>
-            {/* Ensure paymentDate is a valid string before trying to use getTime on a Date object from it */}
-            <p>MOCK-{due.id}-{paymentDate ? new Date(paymentDate + 'T00:00:00').getTime() : new Date().getTime()}</p>
+            <p>{transactionId}</p>
           </div>
         </div>
         <DialogFooter className="gap-2 sm:justify-end">
-          <Button type="button" variant="outline" onClick={handlePrint}>
+          <Button type="button" variant="outline" onClick={handleDownload}>
             <Download className="mr-2 h-4 w-4" />
-            Print/Download
+            Download Receipt
           </Button>
           <Button type="button" onClick={onClose}>Close</Button>
         </DialogFooter>
@@ -76,3 +100,4 @@ export function ReceiptModal({ isOpen, onClose, due, studentName, paymentDate }:
     </Dialog>
   );
 }
+
