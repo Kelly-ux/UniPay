@@ -105,7 +105,7 @@ export function DueCard({ due }: DueCardProps) {
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover"
-            data-ai-hint="university campus"
+            data-ai-hint="university building"
           />
           <div className={cn("absolute top-2 right-2")}>
             <Badge variant={badgeVariant || 'default'} className={cn(textColorClass, badgeBgClass, "flex items-center gap-1 font-semibold")}>
@@ -141,7 +141,7 @@ export function DueCard({ due }: DueCardProps) {
         </CardContent>
         <CardFooter className="pt-3 pb-4 border-t mt-auto flex flex-wrap gap-2 justify-between">
           {user?.role === 'student' && currentStatus !== 'Paid' && (
-            <Button onClick={handlePayNow} size="sm" className="flex-1 basis-full sm:basis-auto bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Button onClick={handlePayNow} size="sm" className="flex-1 basis-full sm:basis-auto bg-primary hover:bg-primary/90 text-primary-foreground min-w-[100px]">
               <CreditCard className="mr-2 h-4 w-4" />
               Pay Now
             </Button>
@@ -155,18 +155,18 @@ export function DueCard({ due }: DueCardProps) {
                 }} 
                 size="sm" 
                 variant="outline" 
-                className="flex-1 basis-full sm:basis-auto text-green-600 border-green-500 hover:bg-green-50 hover:text-green-700"
+                className="flex-1 basis-full sm:basis-auto text-green-600 border-green-500 hover:bg-green-50 hover:text-green-700 min-w-[150px]"
             >
               View My Receipt
             </Button>
           )}
           
           {user?.role === 'admin' && (
-            <div className="w-full flex flex-col sm:flex-row gap-2">
-              <Button onClick={handleViewPayments} variant="outline" size="sm" className="flex-1 hover:bg-blue-50 hover:text-blue-700 border-blue-500 text-blue-600">
+            <div className="w-full flex flex-col sm:flex-row sm:flex-wrap gap-2">
+              <Button onClick={handleViewPayments} variant="outline" size="sm" className="flex-1 min-w-[140px] hover:bg-blue-50 hover:text-blue-700 border-blue-500 text-blue-600">
                 <Eye className="mr-2 h-4 w-4" /> View Payments
               </Button>
-              <Button asChild variant="outline" size="sm" className="flex-1 hover:bg-accent hover:text-accent-foreground border-primary/50 text-primary hover:border-primary">
+              <Button asChild variant="outline" size="sm" className="flex-1 min-w-[140px] hover:bg-accent hover:text-accent-foreground border-primary/50 text-primary hover:border-primary">
                 <Link href={reminderLink}>
                   <Mail className="mr-2 h-4 w-4" />
                   Gen. Reminder
@@ -176,7 +176,7 @@ export function DueCard({ due }: DueCardProps) {
                 onClick={handleRemoveDue} 
                 variant="destructive" 
                 size="sm" 
-                className="flex-1"
+                className="flex-1 min-w-[110px]"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Remove
