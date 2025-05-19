@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import type { Due } from '@/lib/mock-data'; // Due is a Due Definition
 import { CheckCircle, Download } from 'lucide-react';
-import { format } from 'date-fns';
+import { jsPDF } from 'jspdf';
 
 interface ReceiptModalProps {
   isOpen: boolean;
@@ -20,35 +20,41 @@ export function ReceiptModal({ isOpen, onClose, due, studentName, paymentDate }:
   if (!due) return null;
 
   const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(due.amount);
-  const displayPaymentDate = paymentDate ? new Date(paymentDate + 'T00:00:00.000Z').toLocaleDateString() : 'N/A'; // Use UTC to avoid timezone issues
-  const transactionId = `MOCK-${due.id}-${paymentDate ? new Date(paymentDate + 'T00:00:00.000Z').getTime() : new Date().getTime()}`;
+  const displayPaymentDate = paymentDate ? new Date(paymentDate + 'T00:00:00.000Z').toLocaleDateString() : 'N/A';
+  const transactionId = \`MOCK-\${due.id}-\${paymentDate ? new Date(paymentDate + 'T00:00:00.000Z').getTime() : new Date().getTime()}\`;
 
-  const generateReceiptContent = () => {
-    return `
-Payment Receipt
----------------------------------
-Receipt For: ${due.description}
-Student Name: ${studentName}
-School: ${due.school}
-Department: ${due.department}
-Amount Paid: ${formattedAmount}
-Payment Date: ${displayPaymentDate}
-Transaction ID: ${transactionId}
----------------------------------
-Thank you for your payment!
-    `;
-  };
+  const handleDownloadPdf = () => {
+    const doc = new jsPDF();
+    
+    doc.setFontSize(18);
+    doc.text("Payment Receipt", 105, 20, { align: "center" });
+    
+    doc.setFontSize(12);
+    doc.text("--------------------------------------------------------------------------------------------------", 10, 30);
 
-  const handleDownload = () => {
-    const receiptText = generateReceiptContent();
-    const blob = new Blob([receiptText.trim()], { type: 'text/plain;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `UniPay_Receipt_${studentName.replace(/\s+/g, '_')}_${due.id}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href); // Clean up
+    let yPos = 40;
+    const lineHeight = 7;
+
+    doc.text(\`Receipt For: \${due.description}\`, 10, yPos);
+    yPos += lineHeight;
+    doc.text(\`Student Name: \${studentName}\`, 10, yPos);
+    yPos += lineHeight;
+    doc.text(\`School: \${due.school}\`, 10, yPos);
+    yPos += lineHeight;
+    doc.text(\`Department: \${due.department}\`, 10, yPos);
+    yPos += lineHeight;
+    doc.text(\`Amount Paid: \${formattedAmount}\`, 10, yPos);
+    yPos += lineHeight;
+    doc.text(\`Payment Date: \${displayPaymentDate}\`, 10, yPos);
+    yPos += lineHeight;
+    doc.text(\`Transaction ID: \${transactionId}\`, 10, yPos);
+    yPos += lineHeight * 2;
+    
+    doc.text("--------------------------------------------------------------------------------------------------", 10, yPos);
+    yPos += lineHeight;
+    doc.text("Thank you for your payment!", 105, yPos, { align: "center" });
+
+    doc.save(\`UniPay_Receipt_\${studentName.replace(/\\s+/g, '_')}_\${due.id}.pdf\`);
   };
 
   return (
@@ -90,9 +96,9 @@ Thank you for your payment!
           </div>
         </div>
         <DialogFooter className="gap-2 sm:justify-end">
-          <Button type="button" variant="outline" onClick={handleDownload}>
+          <Button type="button" variant="outline" onClick={handleDownloadPdf}>
             <Download className="mr-2 h-4 w-4" />
-            Download Receipt
+            Download PDF Receipt
           </Button>
           <Button type="button" onClick={onClose}>Close</Button>
         </DialogFooter>
@@ -100,4 +106,3 @@ Thank you for your payment!
     </Dialog>
   );
 }
-

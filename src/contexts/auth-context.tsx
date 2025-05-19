@@ -4,18 +4,7 @@
 import type { User } from '@/lib/types';
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
-// Define the map at the module level for known student names in mock data
-const studentNameMap: Record<string, string> = {
-  "alice": "Alice Wonderland",
-  "bob": "Bob The Builder",
-  "charlie": "Charlie Brown",
-  "diana": "Diana Prince",
-  "edward": "Edward Scissorhands",
-  "fiona": "Fiona Gallagher",
-  "harry": "Harry Potter",
-  "hermione": "Hermione Granger",
-};
+import { studentNameMap } from '@/lib/mock-data'; // Import studentNameMap
 
 interface AuthContextType {
   user: User | null;
@@ -45,21 +34,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = (userDataFromLoginPage: User) => {
-    // userDataFromLoginPage typically has 'name' as the email prefix
-    let userToStore = { ...userDataFromLoginPage }; // Create a mutable copy
+    let userToStore = { ...userDataFromLoginPage };
+    const emailPrefix = userToStore.email.split('@')[0].toLowerCase();
 
     if (userToStore.role === 'student') {
-      const emailPrefix = userToStore.email.split('@')[0].toLowerCase();
       const mappedFullName = studentNameMap[emailPrefix];
       if (mappedFullName) {
-        userToStore.name = mappedFullName; // Update name to full name if a mapping exists
+        userToStore.name = mappedFullName;
+        userToStore.id = \`mock-student-\${emailPrefix}\`; // Assign predictable ID
+      } else {
+        // For students not in the map, keep generic ID but still try to make a name
+        userToStore.name = userToStore.name || emailPrefix; // Keep provided name or use prefix
+        userToStore.id = userToStore.id || Date.now().toString(); // Use provided ID or generate new one
       }
-      // If no mapping, userToStore.name remains the email prefix from login page
+    } else if (userToStore.role === 'admin') {
+      // Ensure admin also has a consistent ID if desired, or keep as is
+      userToStore.id = userToStore.id || 'admin-user'; // Example consistent ID for admin
+      userToStore.name = userToStore.name || 'Admin';
     }
+
 
     setUser(userToStore);
     localStorage.setItem('uniPayUser', JSON.stringify(userToStore));
     
+    // Redirect logic remains the same
     if (userToStore.role === 'admin') {
       router.push('/'); 
     } else {

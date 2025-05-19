@@ -98,3 +98,26 @@ export const uniqueSchools = Array.from(new Set(mockDuesInitial.map(due => due.s
 export const uniqueDepartments = Array.from(new Set(mockDuesInitial.map(due => due.department))).sort();
 export const dueStatuses: DueStatus[] = ['Paid', 'Unpaid', 'Overdue']; // Statuses are now dynamic per student
 
+// Map for known student names, used for mock login and display
+export const studentNameMap: Record<string, string> = {
+  "alice": "Alice Wonderland",
+  "bob": "Bob The Builder",
+  "charlie": "Charlie Brown",
+  "diana": "Diana Prince",
+  "edward": "Edward Scissorhands",
+  "fiona": "Fiona Gallagher",
+  "harry": "Harry Potter",
+  "hermione": "Hermione Granger",
+  // Add more mock students as needed
+};
+
+// Helper to get student display name from a potentially prefixed ID
+export const getStudentDisplayNameFromId = (studentId: string): string => {
+  if (studentId.startsWith('mock-student-')) {
+    const emailPrefix = studentId.replace('mock-student-', '');
+    return studentNameMap[emailPrefix] || studentId; // Fallback to ID if prefix not in map
+  }
+  // For admin users or other ID formats, you might have a different lookup or just return the ID
+  if (studentId === 'admin-user') return 'Admin User'; // Example for admin
+  return studentId; // Fallback for any other ID format
+};

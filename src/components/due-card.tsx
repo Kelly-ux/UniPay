@@ -5,7 +5,7 @@ import type { Due, DueStatus } from '@/lib/mock-data'; // Due is now a DueDefini
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, CheckCircle2, DollarSign, Info, Mail, School, Building, CalendarDays, CreditCard, Trash2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, DollarSign, Info, Mail, School, Building, CalendarDays, CreditCard, Trash2, Eye } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -13,8 +13,9 @@ import { useAuth } from '@/contexts/auth-context';
 import { useDues } from '@/contexts/dues-context';
 import React, { useState, useMemo } from 'react';
 import { ReceiptModal } from './receipt-modal';
+import { PaymentListModal } from './payment-list-modal'; // Import the new modal
 import { toast } from '@/hooks/use-toast';
-import { format } from 'date-fns'; // For receipt modal fallback
+import { format } from 'date-fns'; 
 
 interface DueCardProps {
   due: Due; // This is a Due Definition
@@ -30,14 +31,17 @@ const statusStyles: Record<DueStatus, { icon: React.ElementType; badgeVariant: '
 export function DueCard({ due }: DueCardProps) {
   const { user } = useAuth();
   const { recordStudentPayment, hasStudentPaid, getStudentPaymentDate, removeDue } = useDues();
-  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const [receiptStudentName, setReceiptStudentName] = useState<string | null>(null);
   const [receiptDueDetails, setReceiptDueDetails] = useState<Due | null>(null);
 
+  const [isPaymentListModalOpen, setIsPaymentListModalOpen] = useState(false);
+  const [selectedDueForPaymentList, setSelectedDueForPaymentList] = useState<Due | null>(null);
+
 
   const studentHasPaid = useMemo(() => {
-    if (!user) return false;
+    if (!user || user.role !== 'student') return false; // Only students can have "paid" status for themselves
     return hasStudentPaid(due.id, user.id);
   }, [due.id, user, hasStudentPaid]);
 
@@ -47,19 +51,22 @@ export function DueCard({ due }: DueCardProps) {
   }, [due.id, user, studentHasPaid, getStudentPaymentDate]);
 
   const currentStatus: DueStatus = useMemo(() => {
+    if (user?.role === 'admin') { // Admins see a neutral status, they view payments separately
+      const today = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
+      const dueDateObj = new Date(due.dueDate + 'T00:00:00.000Z');
+      return dueDateObj < today ? 'Overdue' : 'Unpaid'; // Or a general status like 'Active'
+    }
     if (studentHasPaid) return 'Paid';
-    // Ensure correct date comparison. Dates from mock data are YYYY-MM-DD.
-    // Create Date objects at midnight UTC to compare consistently.
     const today = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
-    const dueDate = new Date(due.dueDate + 'T00:00:00.000Z');
-    if (dueDate < today) return 'Overdue';
+    const dueDateObj = new Date(due.dueDate + 'T00:00:00.000Z');
+    if (dueDateObj < today) return 'Overdue';
     return 'Unpaid';
-  }, [studentHasPaid, due.dueDate]);
+  }, [studentHasPaid, due.dueDate, user?.role]);
 
   const { icon: StatusIcon, badgeVariant, textColorClass, iconColorClass, badgeBgClass } = statusStyles[currentStatus];
   const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(due.amount);
   
-  const reminderLink = `/admin/generate-reminder?dueAmount=${due.amount}&dueDate=${due.dueDate}&schoolName=${encodeURIComponent(due.school)}&departmentName=${encodeURIComponent(due.department)}&paymentMethod=${encodeURIComponent(due.paymentMethodSuggestion || 'University Payment Portal')}&description=${encodeURIComponent(due.description)}`;
+  const reminderLink = \`/admin/generate-reminder?dueAmount=\${due.amount}&dueDate=\${due.dueDate}&schoolName=\${encodeURIComponent(due.school)}&departmentName=\${encodeURIComponent(due.department)}&paymentMethod=\${encodeURIComponent(due.paymentMethodSuggestion || 'University Payment Portal')}&description=\${encodeURIComponent(due.description)}\`;
 
 
   const handlePayNow = async () => {
@@ -67,8 +74,6 @@ export function DueCard({ due }: DueCardProps) {
       toast({ title: "Login Required", description: "Please log in to make a payment.", variant: "destructive" });
       return;
     }
-    // Simulate payment
-    await new Promise(resolve => setTimeout(resolve, 100)); 
     recordStudentPayment(due.id, user.id);
     
     setReceiptStudentName(user.name); 
@@ -77,14 +82,17 @@ export function DueCard({ due }: DueCardProps) {
 
     toast({
       title: "Payment Successful!",
-      description: `Payment for "${due.description}" has been processed by ${user.name}.`,
+      description: \`Payment for "\${due.description}" has been processed by \${user.name}.\`,
     });
   };
 
   const handleRemoveDue = () => {
-    // In a real app, you'd want a confirmation dialog here
     removeDue(due.id);
-    // Toast notification is handled within the removeDue context function
+  };
+
+  const handleViewPayments = () => {
+    setSelectedDueForPaymentList(due);
+    setIsPaymentListModalOpen(true);
   };
 
   return (
@@ -92,12 +100,12 @@ export function DueCard({ due }: DueCardProps) {
       <Card className="flex flex-col h-full shadow-lg hover:shadow-primary/10 transition-shadow duration-300 bg-card text-card-foreground overflow-hidden border border-border rounded-xl">
         <div className="relative w-full h-40">
           <Image 
-            src={`https://placehold.co/600x240.png`}
-            alt={`${due.school} ${due.department}`}
+            src={\`https://placehold.co/600x240.png\`}
+            alt={\`\${due.school} \${due.department}\`}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover"
-            data-ai-hint="university campus building"
+            data-ai-hint="university campus"
           />
           <div className={cn("absolute top-2 right-2")}>
             <Badge variant={badgeVariant || 'default'} className={cn(textColorClass, badgeBgClass, "flex items-center gap-1 font-semibold")}>
@@ -124,14 +132,14 @@ export function DueCard({ due }: DueCardProps) {
             <CalendarDays className="mr-1 h-4 w-4" />
             Due: {new Date(due.dueDate + 'T00:00:00.000Z').toLocaleDateString()}
           </div>
-          {currentStatus === 'Paid' && paymentDateForStudent && (
+          {user?.role === 'student' && currentStatus === 'Paid' && paymentDateForStudent && (
             <div className="flex items-center text-sm text-green-600 font-medium">
               <CheckCircle2 className="mr-1 h-4 w-4" />
               You paid on: {new Date(paymentDateForStudent + 'T00:00:00.000Z').toLocaleDateString()}
             </div>
           )}
         </CardContent>
-        <CardFooter className="pt-3 pb-4 space-x-2 border-t mt-auto flex flex-wrap gap-2">
+        <CardFooter className="pt-3 pb-4 border-t mt-auto flex flex-wrap gap-2 justify-between">
           {user?.role === 'student' && currentStatus !== 'Paid' && (
             <Button onClick={handlePayNow} size="sm" className="flex-1 basis-full sm:basis-auto bg-primary hover:bg-primary/90 text-primary-foreground">
               <CreditCard className="mr-2 h-4 w-4" />
@@ -152,39 +160,55 @@ export function DueCard({ due }: DueCardProps) {
               View My Receipt
             </Button>
           )}
+          
           {user?.role === 'admin' && (
-            <>
-              <Button asChild variant="outline" size="sm" className="flex-1 basis-full sm:basis-auto hover:bg-accent hover:text-accent-foreground border-primary/50 text-primary hover:border-primary">
+            <div className="w-full flex flex-col sm:flex-row gap-2">
+              <Button onClick={handleViewPayments} variant="outline" size="sm" className="flex-1 hover:bg-blue-50 hover:text-blue-700 border-blue-500 text-blue-600">
+                <Eye className="mr-2 h-4 w-4" /> View Payments
+              </Button>
+              <Button asChild variant="outline" size="sm" className="flex-1 hover:bg-accent hover:text-accent-foreground border-primary/50 text-primary hover:border-primary">
                 <Link href={reminderLink}>
                   <Mail className="mr-2 h-4 w-4" />
-                  Generate Reminder
+                  Gen. Reminder
                 </Link>
               </Button>
               <Button 
                 onClick={handleRemoveDue} 
                 variant="destructive" 
                 size="sm" 
-                className="flex-1 basis-full sm:basis-auto"
+                className="flex-1"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Remove Due
+                Remove
               </Button>
-            </>
+            </div>
           )}
         </CardFooter>
       </Card>
+
       {receiptDueDetails && receiptStudentName && (
         <ReceiptModal 
           isOpen={isReceiptModalOpen} 
           onClose={() => {
             setIsReceiptModalOpen(false);
-            setReceiptStudentName(null);
-            setReceiptDueDetails(null);
+            // setReceiptStudentName(null); // Not strictly necessary to clear here if always set before open
+            // setReceiptDueDetails(null);
           }} 
           due={receiptDueDetails} 
           studentName={receiptStudentName}
           paymentDate={paymentDateForStudent || format(new Date(), 'yyyy-MM-dd')}
         />
+      )}
+
+      {user?.role === 'admin' && selectedDueForPaymentList && (
+         <PaymentListModal
+            isOpen={isPaymentListModalOpen}
+            onClose={() => {
+              setIsPaymentListModalOpen(false);
+              setSelectedDueForPaymentList(null);
+            }}
+            dueDefinition={selectedDueForPaymentList}
+         />
       )}
     </>
   );
