@@ -39,6 +39,10 @@ export function DueCard({ due }: DueCardProps) {
   const [isPaymentListModalOpen, setIsPaymentListModalOpen] = useState(false);
   const [selectedDueForPaymentList, setSelectedDueForPaymentList] = useState<Due | null>(null);
 
+  // Helper function to create a UTC date from a 'YYYY-MM-DD' string
+  const createUTCDate = (dateString: string) => {
+    return new Date(dateString + 'T00:00:00.000Z');
+  };
 
   const studentHasPaid = useMemo(() => {
     if (!user || user.role !== 'student') return false; // Only students can have "paid" status for themselves
@@ -51,14 +55,18 @@ export function DueCard({ due }: DueCardProps) {
   }, [due.id, user, studentHasPaid, getStudentPaymentDate]);
 
   const currentStatus: DueStatus = useMemo(() => {
-    if (user?.role === 'admin') { // Admins see a neutral status, they view payments separately
-      const today = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
-      const dueDateObj = new Date(due.dueDate + 'T00:00:00.000Z');
-      return dueDateObj < today ? 'Overdue' : 'Unpaid'; // Or a general status like 'Active'
+    // For consistent date comparison, treat "today" as the start of the day in UTC
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const dueDateObj = createUTCDate(due.dueDate);
+    
+    if (user?.role === 'admin') { // Admins see a general status based on the due date
+      return dueDateObj < today ? 'Overdue' : 'Unpaid';
     }
+    
+    // For students:
     if (studentHasPaid) return 'Paid';
-    const today = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00.000Z');
-    const dueDateObj = new Date(due.dueDate + 'T00:00:00.000Z');
     if (dueDateObj < today) return 'Overdue';
     return 'Unpaid';
   }, [studentHasPaid, due.dueDate, user?.role]);
@@ -105,7 +113,7 @@ export function DueCard({ due }: DueCardProps) {
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover"
-            data-ai-hint="university building"
+            data-ai-hint="university campus"
           />
           <div className={cn("absolute top-2 right-2")}>
             <Badge variant={badgeVariant || 'default'} className={cn(textColorClass, badgeBgClass, "flex items-center gap-1 font-semibold")}>
@@ -130,12 +138,12 @@ export function DueCard({ due }: DueCardProps) {
           </div>
           <div className="flex items-center text-sm text-muted-foreground">
             <CalendarDays className="mr-1 h-4 w-4" />
-            Due: {new Date(due.dueDate + 'T00:00:00.000Z').toLocaleDateString()}
+            Due: {createUTCDate(due.dueDate).toLocaleDateString('en-US', { timeZone: 'UTC' })}
           </div>
           {user?.role === 'student' && currentStatus === 'Paid' && paymentDateForStudent && (
             <div className="flex items-center text-sm text-green-600 font-medium">
               <CheckCircle2 className="mr-1 h-4 w-4" />
-              You paid on: {new Date(paymentDateForStudent + 'T00:00:00.000Z').toLocaleDateString()}
+              You paid on: {createUTCDate(paymentDateForStudent).toLocaleDateString('en-US', { timeZone: 'UTC' })}
             </div>
           )}
         </CardContent>
@@ -191,8 +199,6 @@ export function DueCard({ due }: DueCardProps) {
           isOpen={isReceiptModalOpen} 
           onClose={() => {
             setIsReceiptModalOpen(false);
-            // setReceiptStudentName(null); // Not strictly necessary to clear here if always set before open
-            // setReceiptDueDetails(null);
           }} 
           due={receiptDueDetails} 
           studentName={receiptStudentName}
