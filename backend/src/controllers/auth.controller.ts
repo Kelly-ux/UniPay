@@ -1,3 +1,4 @@
+
 import { Request, Response } from 'express';
 import User from '../models/user.model';
 import jwt from 'jsonwebtoken';
@@ -11,14 +12,12 @@ if (!JWT_SECRET) {
 }
 
 export const registerUser = async (req: Request, res: Response) => {
-  const { name, email, password, role } = req.body;
+  // The 'role' is intentionally removed from the destructured body.
+  // All new users will be registered as 'student' by default for security.
+  const { name, email, password } = req.body;
 
-  if (!name || !email || !password || !role) {
-    return res.status(400).json({ message: 'All fields are required.' });
-  }
-
-  if (role !== 'student' && role !== 'admin') {
-    return res.status(400).json({ message: 'Invalid role specified.' });
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: 'Name, email, and password are required.' });
   }
 
   try {
@@ -27,11 +26,14 @@ export const registerUser = async (req: Request, res: Response) => {
       return res.status(409).json({ message: 'User with this email already exists.' });
     }
 
+    // Create the new user with a hardcoded role of 'student'.
+    // Admin users should be created manually in the database by an administrator
+    // for better security control.
     const newUser = await User.create({
       name,
       email,
       password, // Password will be hashed by the model's hook
-      role,
+      role: 'student', 
     });
     
     // Don't send password hash in response
@@ -42,7 +44,7 @@ export const registerUser = async (req: Request, res: Response) => {
         role: newUser.role,
     };
 
-    res.status(201).json({ message: 'User registered successfully', user: userResponse });
+    res.status(201).json({ message: 'User registered successfully as a student.', user: userResponse });
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ message: 'Server error during registration.' });
@@ -67,6 +69,8 @@ export const loginUser = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
+    // The user's role is retrieved from the database and embedded in the token.
+    // This is the source of truth.
     const token = jwt.sign(
       { id: user.id, role: user.role },
       JWT_SECRET,
