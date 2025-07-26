@@ -20,7 +20,7 @@ export const schoolAndDepartmentData = [
       'Department of Mechanical & manufacturing engineering',
       'Department of Computer & electrical engineering',
       'Department of civil & environmental engineering',
-      'Department of agricultural and bioresources engineering',
+      'Department of agricultural and bio-resources engineering',
     ],
   },
   {
@@ -53,36 +53,13 @@ export const schoolAndDepartmentData = [
     ],
   },
   {
-    name: 'School of Argriculture & technology',
+    name: 'School of Agriculture & technology',
     departments: [
       'Department of agribusiness management and consumer studies',
       'Department of horticulture and crop production',
       'Department of animal production and health',
       'Department of agriculture and resources economics',
       'Department of food science and technology',
-    ],
-  },
-  {
-    name: 'School of Geoscience',
-    departments: [
-      'Department of geological science',
-      'Department of geospatial sciences',
-      'Department of climate science',
-      'Department of geography and sustainability science',
-    ],
-  },
-  {
-    name: 'School of Arts and social sciences',
-    departments: [
-      'Department of entrepreneurship and business science',
-      'Department of languages',
-    ],
-  },
-  {
-    name: 'School of Mines and built environment',
-    departments: [
-      'Department of land management',
-      'Department of sustainable mineral resources development',
     ],
   },
 ];
@@ -134,7 +111,7 @@ export const mockDuesInitial: Due[] = [
   },
   {
     id: '5',
-    school: 'School of Argriculture & technology',
+    school: 'School of Agriculture & technology',
     department: 'Department of food science and technology',
     description: 'Food Grading Practical Fee',
     amount: 250.75,
@@ -143,8 +120,8 @@ export const mockDuesInitial: Due[] = [
   },
   {
     id: '6',
-    school: 'School of Arts and social sciences',
-    department: 'Department of languages',
+    school: 'School of Energy',
+    department: 'Department of renewable energy engineering',
     description: 'Language Lab Access Fee',
     amount: 50.00,
     dueDate: formatDate(addDays(today, 60)), // Due date in the future
