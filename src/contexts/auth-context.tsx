@@ -22,13 +22,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     try {
-      const savedUser = localStorage.getItem('uniPayUser');
+      const savedUser = localStorage.getItem('duesPayUser');
       if (savedUser) {
         setUser(JSON.parse(savedUser));
       }
     } catch (error) {
       console.error("Failed to parse user from localStorage", error);
-      localStorage.removeItem('uniPayUser');
+      localStorage.removeItem('duesPayUser');
     }
     setIsLoading(false);
   }, []);
@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
     setUser(userToStore);
-    localStorage.setItem('uniPayUser', JSON.stringify(userToStore));
+    localStorage.setItem('duesPayUser', JSON.stringify(userToStore));
     
     // Redirect logic remains the same
     if (userToStore.role === 'admin') {
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('uniPayUser');
+    localStorage.removeItem('duesPayUser');
     router.push('/login');
   };
 
@@ -85,4 +85,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

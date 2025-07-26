@@ -65,7 +65,7 @@ export function Header() {
         <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
           <div className="flex items-center gap-2 text-lg font-semibold md:text-base mr-4">
             <AppLogo />
-            <span className="sr-only">UniPay</span>
+            <span className="sr-only">DuesPay</span>
           </div>
           {navItems.map((item) => (
             <Link
@@ -148,7 +148,7 @@ export function Header() {
             <nav className="grid gap-6 text-lg font-medium pt-8">
               <div className="flex items-center gap-2 text-lg font-semibold mb-4">
                 <AppLogo />
-                <span className="sr-only">UniPay</span>
+                <span className="sr-only">DuesPay</span>
               </div>
               {navItems.map((item) => (
                 <Link

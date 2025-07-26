@@ -11,8 +11,8 @@ import { AuthProvider } from '@/contexts/auth-context';
 import { DuesProvider } from '@/contexts/dues-context';
 
 export const metadata: Metadata = {
-  title: 'UniPay - University Payment Management',
-  description: 'Manage your university dues and payments effortlessly with UniPay.',
+  title: 'DuesPay - University Payment Management',
+  description: 'Manage your university dues and payments effortlessly with DuesPay.',
 };
 
 export default function RootLayout({

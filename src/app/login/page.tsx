@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Flame, LogIn } from 'lucide-react';
+import { LogIn, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import type { User } from '@/lib/types';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -70,7 +70,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="text-center">
           <div className="flex justify-center items-center mb-4">
-            <Flame className="h-12 w-12 text-primary" />
+            <UserPlus className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-3xl font-bold">Welcome Back!</CardTitle>
           <CardDescription>Log in to manage your university payments.</CardDescription>
@@ -149,10 +149,9 @@ export default function LoginPage() {
         <CardFooter className="text-center text-sm">
           <p className="text-muted-foreground">
             Don&apos;t have an account?{' '}
-            <Link href="#" className="font-medium text-primary hover:underline">
+            <Link href="/signup" className="font-medium text-primary hover:underline">
               Sign up
             </Link>
-            {' (Not implemented yet)'}
           </p>
         </CardFooter>
       </Card>

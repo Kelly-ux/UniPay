@@ -26,8 +26,8 @@ interface DuesContextType {
 
 const DuesContext = createContext<DuesContextType | undefined>(undefined);
 
-const DUES_DEFINITIONS_STORAGE_KEY = 'uniPayDuesDefinitions';
-const STUDENT_PAYMENTS_STORAGE_KEY = 'uniPayStudentPayments';
+const DUES_DEFINITIONS_STORAGE_KEY = 'duesPayDuesDefinitions';
+const STUDENT_PAYMENTS_STORAGE_KEY = 'duesPayStudentPayments';
 
 
 export const DuesProvider = ({ children }: { children: ReactNode }) => {

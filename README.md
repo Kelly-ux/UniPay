@@ -1,6 +1,7 @@
-# UniPay - University Payment Management
 
-UniPay is a web application designed to streamline the management of university dues and payments for both students and administrators. This project serves as a comprehensive Next.js starter application, showcasing various modern web development practices and integrations.
+# DuesPay - University Payment Management
+
+DuesPay is a web application designed to streamline the management of university dues and payments for both students and administrators. This project serves as a comprehensive Next.js starter application, showcasing various modern web development practices and integrations.
 
 ## Tech Stack
 
@@ -166,4 +167,4 @@ Contributions are welcome! Please follow standard coding practices. Ensure code 
 
 ---
 
-This README aims to provide a good starting point for developers working on or learning from the UniPay application.
+This README aims to provide a good starting point for developers working on or learning from the DuesPay application.

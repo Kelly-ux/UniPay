@@ -54,7 +54,7 @@ export function ReceiptModal({ isOpen, onClose, due, studentName, paymentDate }:
     yPos += lineHeight;
     doc.text("Thank you for your payment!", 105, yPos, { align: "center" });
 
-    doc.save(`UniPay_Receipt_${studentName.replace(/\s+/g, '_')}_${due.id}.pdf`);
+    doc.save(`DuesPay_Receipt_${studentName.replace(/\s+/g, '_')}_${due.id}.pdf`);
   };
 
   return (
