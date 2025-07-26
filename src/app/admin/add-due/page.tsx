@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AuthGuard } from '@/components/auth-guard';
 import { useDues } from '@/contexts/dues-context';
-import { uniqueSchools, uniqueDepartments } from '@/lib/mock-data'; 
+import { schoolAndDepartmentData } from '@/lib/mock-data';
 import { toast } from '@/hooks/use-toast';
 import { CalendarIcon, FilePlus, Building, SchoolIcon as SchoolLucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -38,6 +38,8 @@ function AddDueForm() {
   const { addDue } = useDues();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedSchool, setSelectedSchool] = useState<string>('');
+  const [departmentsForSchool, setDepartmentsForSchool] = useState<string[]>([]);
 
   const form = useForm<AddDueFormValues>({
     resolver: zodResolver(AddDueSchema),
@@ -50,6 +52,19 @@ function AddDueForm() {
     },
   });
 
+  const schoolValue = form.watch('school');
+  
+  useEffect(() => {
+    if (schoolValue) {
+      const schoolData = schoolAndDepartmentData.find(s => s.name === schoolValue);
+      setDepartmentsForSchool(schoolData ? schoolData.departments : []);
+      form.setValue('department', ''); // Reset department when school changes
+    } else {
+      setDepartmentsForSchool([]);
+    }
+  }, [schoolValue, form]);
+
+
   const onSubmit = async (data: AddDueFormValues) => {
     setIsLoading(true);
     try {
@@ -60,7 +75,7 @@ function AddDueForm() {
         ...data,
         dueDate: format(data.dueDate, 'yyyy-MM-dd'), 
       };
-      addDue(dueDefinitionData); // addDue now takes Omit<Due, 'id'>
+      addDue(dueDefinitionData);
 
       toast({
         title: 'Due Definition Added!',
@@ -113,12 +128,12 @@ function AddDueForm() {
                 name="school"
                 control={form.control}
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={(value) => { field.onChange(value); setSelectedSchool(value); }} value={field.value}>
                     <SelectTrigger id="school">
                       <SelectValue placeholder="Select School" />
                     </SelectTrigger>
                     <SelectContent>
-                      {uniqueSchools.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                      {schoolAndDepartmentData.map(s => <SelectItem key={s.name} value={s.name}>{s.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 )}
@@ -133,12 +148,12 @@ function AddDueForm() {
                 name="department"
                 control={form.control}
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={!schoolValue}>
                     <SelectTrigger id="department">
                       <SelectValue placeholder="Select Department" />
                     </SelectTrigger>
                     <SelectContent>
-                      {uniqueDepartments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                      {departmentsForSchool.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 )}

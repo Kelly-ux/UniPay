@@ -12,6 +12,82 @@ export interface Due {
   paymentMethodSuggestion?: string; 
 }
 
+// Authoritative list of schools and their departments
+export const schoolAndDepartmentData = [
+  {
+    name: 'School of Engineering',
+    departments: [
+      'Department of Mechanical & manufacturing engineering',
+      'Department of Computer & electrical engineering',
+      'Department of civil & environmental engineering',
+      'Department of agricultural and bioresources engineering',
+    ],
+  },
+  {
+    name: 'School of Energy',
+    departments: [
+      'Department of renewable energy engineering',
+      'Department of petroleum and natural gas engineering',
+    ],
+  },
+  {
+    name: 'School of Natural resources',
+    departments: [
+      'Department of forest science',
+      'Department of fisheries and water resources',
+      'Department of environmental management',
+      'Department of ecotourism, recreation & hospitality',
+      'Department of fire, safety and disaster management',
+    ],
+  },
+  {
+    name: 'School of Science',
+    departments: [
+      'Department of chemical sciences',
+      'Department of computer science and informatics',
+      'Department of mathematics and statistics',
+      'Department of nursing',
+      'Department of biological science',
+      'Department of medical laboratory science',
+      'Department of information technology & decision science',
+    ],
+  },
+  {
+    name: 'School of Argriculture & technology',
+    departments: [
+      'Department of agribusiness management and consumer studies',
+      'Department of horticulture and crop production',
+      'Department of animal production and health',
+      'Department of agriculture and resources economics',
+      'Department of food science and technology',
+    ],
+  },
+  {
+    name: 'School of Geoscience',
+    departments: [
+      'Department of geological science',
+      'Department of geospatial sciences',
+      'Department of climate science',
+      'Department of geography and sustainability science',
+    ],
+  },
+  {
+    name: 'School of Arts and social sciences',
+    departments: [
+      'Department of entrepreneurship and business science',
+      'Department of languages',
+    ],
+  },
+  {
+    name: 'School of Mines and built environment',
+    departments: [
+      'Department of land management',
+      'Department of sustainable mineral resources development',
+    ],
+  },
+];
+
+
 const today = new Date();
 const formatDate = (date: Date): string => date.toISOString().split('T')[0];
 const addDays = (date: Date, days: number): Date => {
@@ -24,8 +100,8 @@ export const mockDuesInitial: Due[] = [
   {
     id: '1',
     school: 'School of Engineering',
-    department: 'Computer Science',
-    description: 'Fall Semester Tuition Fee',
+    department: 'Department of Computer & electrical engineering',
+    description: 'Fall Semester Lab Fee',
     amount: 1200.50,
     dueDate: formatDate(addDays(today, -15)), // Due date is in the past
     paymentMethodSuggestion: 'Online Portal',
@@ -33,63 +109,45 @@ export const mockDuesInitial: Due[] = [
   {
     id: '2',
     school: 'School of Engineering',
-    department: 'Mechanical Engineering',
-    description: 'Lab Equipment Fee',
+    department: 'Department of Mechanical & manufacturing engineering',
+    description: 'Workshop Safety Certification',
     amount: 75.00,
     dueDate: formatDate(addDays(today, 10)), // Due date is in the future
     paymentMethodSuggestion: 'Department Office (Cash/Card)',
   },
   {
     id: '3',
-    school: 'School of Arts',
-    department: 'Fine Arts',
-    description: 'Studio Access Fee',
-    amount: 50.25,
+    school: 'School of Natural resources',
+    department: 'Department of ecotourism, recreation & hospitality',
+    description: 'Annual Field Trip Contribution',
+    amount: 150.25,
     dueDate: formatDate(addDays(today, -5)), // Due date in the past
   },
   {
     id: '4',
-    school: 'School of Humanities',
-    department: 'History',
-    description: 'Library Late Fine',
-    amount: 15.00,
-    dueDate: formatDate(addDays(today, -35)), // Due date well in the past
-    paymentMethodSuggestion: 'Library Front Desk',
+    school: 'School of Science',
+    department: 'Department of computer science and informatics',
+    description: 'Advanced Programming Textbook',
+    amount: 95.00,
+    dueDate: formatDate(addDays(today, 20)),
+    paymentMethodSuggestion: 'University Bookstore',
   },
   {
     id: '5',
-    school: 'School of Design',
-    department: 'Industrial Design',
-    description: 'Material Costs',
+    school: 'School of Argriculture & technology',
+    department: 'Department of food science and technology',
+    description: 'Food Grading Practical Fee',
     amount: 250.75,
     dueDate: formatDate(addDays(today, 30)), // Due date in the future
     paymentMethodSuggestion: 'Online Payment Gateway',
   },
   {
     id: '6',
-    school: 'School of Business',
-    department: 'Management',
-    description: 'Spring Semester Advance',
-    amount: 1000.00,
+    school: 'School of Arts and social sciences',
+    department: 'Department of languages',
+    description: 'Language Lab Access Fee',
+    amount: 50.00,
     dueDate: formatDate(addDays(today, 60)), // Due date in the future
-  },
-   {
-    id: '7',
-    school: 'School of Engineering',
-    department: 'Computer Science', // Same dept as due '1'
-    description: 'Advanced Algorithms Textbook',
-    amount: 90.00,
-    dueDate: formatDate(addDays(today, 5)),
-    paymentMethodSuggestion: 'University Bookstore',
-  },
-  {
-    id: '8',
-    school: 'School of Arts',
-    department: 'Literature',
-    description: 'Rare Books Access Fee',
-    amount: 35.50,
-    dueDate: formatDate(addDays(today, -2)), // Due date in the past
-    paymentMethodSuggestion: 'Special Collections Desk',
   },
 ];
 
