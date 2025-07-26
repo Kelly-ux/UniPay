@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import type { Due } from '@/lib/mock-data'; // Due definition
+import type { Due } from '@/lib/types';
 import { mockDuesInitial } from '@/lib/mock-data';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';

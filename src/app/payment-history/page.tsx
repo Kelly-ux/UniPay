@@ -5,7 +5,7 @@ import React, { useMemo } from 'react';
 import { AuthGuard } from '@/components/auth-guard';
 import { useAuth } from '@/contexts/auth-context';
 import { useDues } from '@/contexts/dues-context';
-import type { Due } from '@/lib/mock-data'; // Due definition
+import type { Due } from '@/lib/types';
 import {
   Table,
   TableHeader,

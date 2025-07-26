@@ -4,7 +4,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import type { Due } from '@/lib/mock-data'; // Due is a Due Definition
+import type { Due } from '@/lib/types';
 import { CheckCircle, Download } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 

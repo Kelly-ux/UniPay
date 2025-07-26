@@ -1,16 +1,5 @@
 
-export type DueStatus = 'Paid' | 'Unpaid' | 'Overdue';
-
-// Represents a Due Definition at the school/department level
-export interface Due {
-  id: string;
-  school: string;
-  department: string;
-  description: string;
-  amount: number;
-  dueDate: string; // YYYY-MM-DD
-  paymentMethodSuggestion?: string; 
-}
+import type { Due } from '@/lib/types';
 
 // Authoritative list of schools and their departments
 export const schoolAndDepartmentData = [
@@ -131,7 +120,7 @@ export const mockDuesInitial: Due[] = [
 // These are now based on the Due definitions
 export const uniqueSchools = Array.from(new Set(mockDuesInitial.map(due => due.school))).sort();
 export const uniqueDepartments = Array.from(new Set(mockDuesInitial.map(due => due.department))).sort();
-export const dueStatuses: DueStatus[] = ['Paid', 'Unpaid', 'Overdue']; // Statuses are now dynamic per student
+export const dueStatuses = ['Paid', 'Unpaid', 'Overdue']; // Statuses are now dynamic per student
 
 // Map for known student names, used for mock login and display
 export const studentNameMap: Record<string, string> = {

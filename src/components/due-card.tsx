@@ -1,7 +1,7 @@
 
 "use client";
 
-import type { Due, DueStatus } from '@/lib/mock-data'; // Due is now a DueDefinition
+import type { Due, DueStatus } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';

@@ -1,6 +1,7 @@
+
 "use client";
 
-import type { DueStatus } from '@/lib/mock-data';
+import type { DueStatus } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +11,7 @@ import { Search, X } from 'lucide-react';
 interface DueFiltersProps {
   schools: string[];
   departments: string[];
-  statuses: DueStatus[];
+  statuses: string[];
   onFilterChange: (filters: { school: string; department: string; status: string; searchTerm: string }) => void;
   initialFilters: { school: string; department: string; status: string; searchTerm: string };
 }

@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/components/ui/table';
 import { useDues } from '@/contexts/dues-context';
-import type { Due } from '@/lib/mock-data';
+import type { Due } from '@/lib/types';
 import { getStudentDisplayNameFromId } from '@/lib/mock-data';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Users } from 'lucide-react';
