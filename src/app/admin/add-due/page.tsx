@@ -17,7 +17,7 @@ import { AuthGuard } from '@/components/auth-guard';
 import { useDues } from '@/contexts/dues-context';
 import { uniqueSchools, uniqueDepartments } from '@/lib/mock-data'; 
 import { toast } from '@/hooks/use-toast';
-import { CalendarIcon, DollarSign, FilePlus, Building, SchoolIcon as SchoolLucideIcon } from 'lucide-react';
+import { CalendarIcon, FilePlus, Building, SchoolIcon as SchoolLucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
@@ -93,7 +93,7 @@ function AddDueForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Amount */}
           <div className="space-y-2">
-              <Label htmlFor="amount" className="flex items-center"><DollarSign className="mr-2 h-4 w-4 text-muted-foreground" />Amount (USD)</Label>
+              <Label htmlFor="amount">Amount (GHS)</Label>
               <Input id="amount" type="number" step="0.01" placeholder="e.g., 150.50" {...form.register('amount')} />
               {form.formState.errors.amount && <p className="text-sm text-destructive">{form.formState.errors.amount.message}</p>}
           </div>

@@ -19,7 +19,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { History, DollarSign, CalendarDays, School, Building, FileText } from 'lucide-react';
+import { History, CalendarDays, School, Building, FileText } from 'lucide-react';
 
 interface PaidDueEntry {
   dueDefinition: Due;
@@ -29,6 +29,10 @@ interface PaidDueEntry {
 function PaymentHistoryContent() {
   const { user } = useAuth();
   const { dues: dueDefinitions, studentPayments, getDueById } = useDues();
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(amount);
+  };
 
   const paidDuesForStudent: PaidDueEntry[] = useMemo(() => {
     if (!user) return [];
@@ -89,9 +93,8 @@ function PaymentHistoryContent() {
                     <TableCell className="font-medium">{entry.dueDefinition.description}</TableCell>
                     <TableCell><School className="inline h-4 w-4 mr-1 text-muted-foreground"/>{entry.dueDefinition.school}</TableCell>
                     <TableCell><Building className="inline h-4 w-4 mr-1 text-muted-foreground"/>{entry.dueDefinition.department}</TableCell>
-                    <TableCell className="text-right">
-                        <DollarSign className="inline h-4 w-4 mr-1 text-green-600"/>
-                        {entry.dueDefinition.amount.toFixed(2)}
+                    <TableCell className="text-right font-mono">
+                        {formatCurrency(entry.dueDefinition.amount)}
                     </TableCell>
                     <TableCell className="text-center">
                         <CalendarDays className="inline h-4 w-4 mr-1 text-muted-foreground"/>
@@ -103,9 +106,8 @@ function PaymentHistoryContent() {
               <TableFooter>
                 <TableRow>
                   <TableCell colSpan={3} className="font-semibold text-lg">Total Paid</TableCell>
-                  <TableCell className="text-right font-semibold text-lg">
-                    <DollarSign className="inline h-5 w-5 mr-1 text-green-600"/>
-                    {totalPaid.toFixed(2)}
+                  <TableCell className="text-right font-semibold text-lg font-mono">
+                    {formatCurrency(totalPaid)}
                   </TableCell>
                   <TableCell></TableCell>
                 </TableRow>

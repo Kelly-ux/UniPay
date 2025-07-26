@@ -5,7 +5,7 @@ import type { Due, DueStatus } from '@/lib/mock-data'; // Due is now a DueDefini
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, CheckCircle2, DollarSign, Info, Mail, School, Building, CalendarDays, CreditCard, Trash2, Eye } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Info, Mail, School, Building, CalendarDays, CreditCard, Trash2, Eye } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -41,6 +41,11 @@ export function DueCard({ due }: DueCardProps) {
 
   // Helper function to create a UTC date from a 'YYYY-MM-DD' string
   const createUTCDate = (dateString: string) => {
+    // If the date string already contains time info, use it directly.
+    // Otherwise, append the time to ensure it's parsed as UTC midnight.
+    if (dateString.includes('T')) {
+        return new Date(dateString);
+    }
     return new Date(dateString + 'T00:00:00.000Z');
   };
 
@@ -72,7 +77,7 @@ export function DueCard({ due }: DueCardProps) {
   }, [studentHasPaid, due.dueDate, user?.role]);
 
   const { icon: StatusIcon, badgeVariant, textColorClass, iconColorClass, badgeBgClass } = statusStyles[currentStatus];
-  const formattedAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(due.amount);
+  const formattedAmount = new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(due.amount);
   
   const reminderLink = `/admin/generate-reminder?dueAmount=${due.amount}&dueDate=${due.dueDate}&schoolName=${encodeURIComponent(due.school)}&departmentName=${encodeURIComponent(due.department)}&paymentMethod=${encodeURIComponent(due.paymentMethodSuggestion || 'University Payment Portal')}&description=${encodeURIComponent(due.description)}`;
 
@@ -132,8 +137,7 @@ export function DueCard({ due }: DueCardProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex-grow space-y-2 py-2">
-          <div className="flex items-center text-xl font-bold text-primary">
-            <DollarSign className="mr-1 h-5 w-5" />
+          <div className="flex items-center text-xl font-bold text-primary font-mono">
             {formattedAmount}
           </div>
           <div className="flex items-center text-sm text-muted-foreground">
