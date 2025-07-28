@@ -49,31 +49,34 @@ function GenerateReminderPageCore() {
 
 function GenerateReminderPageSkeleton() {
   return (
-    <div className="max-w-3xl mx-auto">
-      <Skeleton className="h-10 w-3/4 mx-auto mb-8" /> {/* Title Skeleton */}
-      <Card className="w-full shadow-xl">
-        <CardHeader>
-          <Skeleton className="h-8 w-1/2 mb-2" /> {/* Card Title Skeleton */}
-          <Skeleton className="h-4 w-3/4" /> {/* Card Description Skeleton */}
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
+    <Card className="w-full max-w-3xl mx-auto shadow-xl">
+      <CardHeader>
+        <div className="flex items-center gap-2 mb-2">
+          <Bot className="h-8 w-8 text-primary" />
+          <CardTitle className="text-3xl font-bold">AI Payment Reminder Generator</CardTitle>
+        </div>
+        <CardDescription>
+          Use this tool to generate payment reminders. The form can be pre-filled by clicking &quot;Generate Reminder&quot; on a due card.
+          If Student Name is left blank, a general reminder for the department will be generated.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+         <div className="space-y-6">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
+                <div className="space-y-2"><Skeleton className="h-4 w-1/3" /><Skeleton className="h-10 w-full" /></div>
+                <div className="space-y-2"><Skeleton className="h-4 w-1/3" /><Skeleton className="h-10 w-full" /></div>
             </div>
-            <Skeleton className="h-10 w-full" /> 
-            <Skeleton className="h-10 w-full" /> {/* Description Skeleton */}
+            <div className="space-y-2"><Skeleton className="h-4 w-1/4" /><Skeleton className="h-10 w-full" /></div>
+            <div className="space-y-2"><Skeleton className="h-4 w-1/4" /><Skeleton className="h-10 w-full" /></div>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
+                 <div className="space-y-2"><Skeleton className="h-4 w-1/3" /><Skeleton className="h-10 w-full" /></div>
+                 <div className="space-y-2"><Skeleton className="h-4 w-1/3" /><Skeleton className="h-10 w-full" /></div>
             </div>
+            <div className="space-y-2"><Skeleton className="h-4 w-1/4" /><Skeleton className="h-10 w-full" /></div>
             <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-12 w-full" /> {/* Button Skeleton */}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
