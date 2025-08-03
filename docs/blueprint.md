@@ -1,4 +1,4 @@
-# **App Name**: UniPay
+# **App Name**: DuesPay
 
 ## Core Features:
 

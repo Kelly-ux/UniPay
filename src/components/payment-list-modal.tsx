@@ -42,7 +42,8 @@ export function PaymentListModal({ isOpen, onClose, dueDefinition }: PaymentList
               <TableCaption>Total {paymentsForThisDue.length} payment(s) for this due.</TableCaption>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Student Name / ID</TableHead>
+                  <TableHead>Student Name</TableHead>
+                  <TableHead>Student ID</TableHead>
                   <TableHead className="text-right">Payment Date</TableHead>
                 </TableRow>
               </TableHeader>
@@ -50,6 +51,7 @@ export function PaymentListModal({ isOpen, onClose, dueDefinition }: PaymentList
                 {paymentsForThisDue.map(payment => (
                   <TableRow key={payment.studentId}>
                     <TableCell className="font-medium">{getStudentDisplayNameFromId(payment.studentId)}</TableCell>
+                    <TableCell className="font-mono text-muted-foreground">{payment.studentId}</TableCell>
                     <TableCell className="text-right">{new Date(payment.paymentDate + 'T00:00:00.000Z').toLocaleDateString()}</TableCell>
                   </TableRow>
                 ))}

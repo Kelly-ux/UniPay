@@ -106,6 +106,9 @@ export function Header() {
                   <p className="text-xs leading-none text-muted-foreground">
                     {user.email}
                   </p>
+                   <p className="text-xs leading-none text-muted-foreground pt-1">
+                    ID: {user.id}
+                  </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />

@@ -34,6 +34,7 @@ export function DueCard({ due }: DueCardProps) {
   
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const [receiptStudentName, setReceiptStudentName] = useState<string | null>(null);
+  const [receiptStudentId, setReceiptStudentId] = useState<string | null>(null); // Added state for student ID
   const [receiptDueDetails, setReceiptDueDetails] = useState<Due | null>(null);
 
   const [isPaymentListModalOpen, setIsPaymentListModalOpen] = useState(false);
@@ -90,6 +91,7 @@ export function DueCard({ due }: DueCardProps) {
     recordStudentPayment(due.id, user.id);
     
     setReceiptStudentName(user.name); 
+    setReceiptStudentId(user.id);
     setReceiptDueDetails(due); 
     setIsReceiptModalOpen(true);
 
@@ -158,10 +160,11 @@ export function DueCard({ due }: DueCardProps) {
               Pay Now
             </Button>
           )}
-          {user?.role === 'student' && currentStatus === 'Paid' && (
+          {user?.role === 'student' && currentStatus === 'Paid' && user && (
              <Button 
                 onClick={() => {
                     setReceiptStudentName(user.name);
+                    setReceiptStudentId(user.id);
                     setReceiptDueDetails(due);
                     setIsReceiptModalOpen(true);
                 }} 
@@ -198,7 +201,7 @@ export function DueCard({ due }: DueCardProps) {
         </CardFooter>
       </Card>
 
-      {receiptDueDetails && receiptStudentName && (
+      {receiptDueDetails && receiptStudentName && receiptStudentId && (
         <ReceiptModal 
           isOpen={isReceiptModalOpen} 
           onClose={() => {
@@ -206,6 +209,7 @@ export function DueCard({ due }: DueCardProps) {
           }} 
           due={receiptDueDetails} 
           studentName={receiptStudentName}
+          studentId={receiptStudentId}
           paymentDate={paymentDateForStudent || format(new Date(), 'yyyy-MM-dd')}
         />
       )}

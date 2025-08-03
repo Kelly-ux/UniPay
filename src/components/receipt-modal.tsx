@@ -13,10 +13,11 @@ interface ReceiptModalProps {
   onClose: () => void;
   due: Due | null; // Due Definition
   studentName: string;
+  studentId: string; // Added studentId prop
   paymentDate: string; // YYYY-MM-DD format
 }
 
-export function ReceiptModal({ isOpen, onClose, due, studentName, paymentDate }: ReceiptModalProps) {
+export function ReceiptModal({ isOpen, onClose, due, studentName, studentId, paymentDate }: ReceiptModalProps) {
   if (!due) return null;
 
   const formattedAmount = new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(due.amount);
@@ -38,6 +39,8 @@ export function ReceiptModal({ isOpen, onClose, due, studentName, paymentDate }:
     doc.text(`Receipt For: ${due.description}`, 10, yPos);
     yPos += lineHeight;
     doc.text(`Student Name: ${studentName}`, 10, yPos);
+    yPos += lineHeight;
+    doc.text(`Student ID: ${studentId}`, 10, yPos); // Add student ID to PDF
     yPos += lineHeight;
     doc.text(`School: ${due.school}`, 10, yPos);
     yPos += lineHeight;
@@ -77,6 +80,10 @@ export function ReceiptModal({ isOpen, onClose, due, studentName, paymentDate }:
           <div>
             <h4 className="font-semibold">Student Name:</h4>
             <p>{studentName}</p>
+          </div>
+          <div>
+            <h4 className="font-semibold">Student ID:</h4>
+            <p className="font-mono text-muted-foreground">{studentId}</p>
           </div>
           <div>
             <h4 className="font-semibold">School & Department:</h4>
