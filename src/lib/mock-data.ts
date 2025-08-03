@@ -1,5 +1,5 @@
 
-import type { Due } from '@/lib/types';
+import type { Due, DueStatus } from './types';
 
 // Authoritative list of schools and their departments
 export const schoolAndDepartmentData = [
@@ -9,7 +9,7 @@ export const schoolAndDepartmentData = [
       'Department of Mechanical & manufacturing engineering',
       'Department of Computer & electrical engineering',
       'Department of civil & environmental engineering',
-      'Department of agricultural and bio-resources engineering',
+      'Department of agricultural and bioresources engineering',
     ],
   },
   {

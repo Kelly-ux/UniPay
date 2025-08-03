@@ -34,34 +34,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = (userDataFromLoginPage: User) => {
-    // When a user logs in, we now primarily use the ID they provided during signup.
-    // The logic to auto-generate an ID is now a fallback for older mock users.
+    // This function creates a more realistic mock user based on email.
+    // It's a bridge until a real backend provides user data.
     let userToStore = { ...userDataFromLoginPage };
     const emailPrefix = userToStore.email.split('@')[0].toLowerCase();
-
-    // The 'id' should come from the user's signup data now.
-    // This logic can be simplified once the backend provides the definitive user object on login.
+    
+    // If the user logging in has a name we've mapped, use it for a better demo experience
     if (userToStore.role === 'student') {
-        // We still map the name for our predefined mock users for demo purposes.
         const mappedFullName = studentNameMap[emailPrefix];
-        if (mappedFullName) {
+        if(mappedFullName) {
             userToStore.name = mappedFullName;
         }
-        // The ID will now be what the user entered at signup, so we don't need to generate it here.
-        // We will just use the id that's passed in the userData.
-        // For our existing mock data, we might need a transition or just create new users.
-        // For now, let's assume the ID is passed correctly.
-         userToStore.id = userDataFromLoginPage.id || `student-${Date.now()}`;
+        // Assign a predictable ID for mock students so their payments can be tracked consistently.
+        userToStore.id = `mock-student-${emailPrefix}`;
     } else if (userToStore.role === 'admin') {
-      userToStore.id = userDataFromLoginPage.id || 'admin-user';
-      userToStore.name = userToStore.name || 'Admin';
+        userToStore.id = 'admin-user'; // Fixed ID for any admin user
+        userToStore.name = "Admin";
     }
-
 
     setUser(userToStore);
     localStorage.setItem('duesPayUser', JSON.stringify(userToStore));
-    
-    router.push('/');
   };
 
   const logout = () => {
