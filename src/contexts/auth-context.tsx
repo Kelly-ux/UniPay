@@ -34,22 +34,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = (userDataFromLoginPage: User) => {
+    // When a user logs in, we now primarily use the ID they provided during signup.
+    // The logic to auto-generate an ID is now a fallback for older mock users.
     let userToStore = { ...userDataFromLoginPage };
     const emailPrefix = userToStore.email.split('@')[0].toLowerCase();
 
+    // The 'id' should come from the user's signup data now.
+    // This logic can be simplified once the backend provides the definitive user object on login.
     if (userToStore.role === 'student') {
-      const mappedFullName = studentNameMap[emailPrefix];
-      if (mappedFullName) {
-        userToStore.name = mappedFullName;
-        userToStore.id = `mock-student-${emailPrefix}`; // Assign predictable ID
-      } else {
-        // For students not in the map, keep generic ID but still try to make a name
-        userToStore.name = userToStore.name || emailPrefix; // Keep provided name or use prefix
-        userToStore.id = userToStore.id || Date.now().toString(); // Use provided ID or generate new one
-      }
+        // We still map the name for our predefined mock users for demo purposes.
+        const mappedFullName = studentNameMap[emailPrefix];
+        if (mappedFullName) {
+            userToStore.name = mappedFullName;
+        }
+        // The ID will now be what the user entered at signup, so we don't need to generate it here.
+        // We will just use the id that's passed in the userData.
+        // For our existing mock data, we might need a transition or just create new users.
+        // For now, let's assume the ID is passed correctly.
+         userToStore.id = userDataFromLoginPage.id || `student-${Date.now()}`;
     } else if (userToStore.role === 'admin') {
-      // Ensure admin also has a consistent ID if desired, or keep as is
-      userToStore.id = userToStore.id || 'admin-user'; // Example consistent ID for admin
+      userToStore.id = userDataFromLoginPage.id || 'admin-user';
       userToStore.name = userToStore.name || 'Admin';
     }
 
@@ -57,12 +61,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(userToStore);
     localStorage.setItem('duesPayUser', JSON.stringify(userToStore));
     
-    // Redirect logic remains the same
-    if (userToStore.role === 'admin') {
-      router.push('/'); 
-    } else {
-      router.push('/');
-    }
+    router.push('/');
   };
 
   const logout = () => {

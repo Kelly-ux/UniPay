@@ -1,6 +1,6 @@
 
 export interface User {
-  id: string;
+  id: string; // This will now be the official Student ID for students
   email: string;
   name: string;
   role: 'student' | 'admin';
