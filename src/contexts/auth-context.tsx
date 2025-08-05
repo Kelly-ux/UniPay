@@ -4,13 +4,13 @@
 import type { User } from '@/lib/types';
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { studentNameMap } from '@/lib/mock-data';
 
 interface AuthContextType {
   user: User | null;
-  login: (credentials: {email: string, password: string}) => Promise<void>;
+  login: (credentials: {email: string, role: 'student' | 'admin'}) => void;
   logout: () => void;
   isLoading: boolean;
-  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,66 +18,52 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
+    // Check if user is in localStorage on initial load
     try {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        // In a real app, you would validate the token with the backend here.
-        // For this implementation, we will decode it.
-        const userData = JSON.parse(atob(token.split('.')[1]));
-        setUser(userData);
+      const storedUser = localStorage.getItem('duesPayUser');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
       }
-    } catch (e) {
-      console.error("Failed to parse user from token", e);
-      localStorage.removeItem('authToken');
+    } catch (error) {
+        console.error("Failed to parse user from localStorage", error);
+        localStorage.removeItem('duesPayUser'); // Clear corrupted data
     }
     setIsLoading(false);
   }, []);
 
-  const login = async (credentials: {email: string, password: string}) => {
+  const login = (credentials: {email: string, role: 'student' | 'admin'}) => {
     setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('http://localhost:4000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
 
-      const data = await response.json();
+    // Mock authentication logic
+    const emailPrefix = credentials.email.split('@')[0].toLowerCase();
+    const studentName = studentNameMap[emailPrefix];
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed.');
-      }
-      
-      const { user: loggedInUser, token } = data;
-      
-      setUser(loggedInUser);
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('duesPayUser', JSON.stringify(loggedInUser)); // For legacy compatibility if needed, can be removed later.
-
-    } catch (err: any) {
-      setError(err.message);
-      throw err; // Re-throw to be caught by the form
-    } finally {
-      setIsLoading(false);
-    }
+    const mockUser: User = {
+      id: credentials.role === 'admin' ? 'admin-user' : `mock-student-${emailPrefix}`,
+      email: credentials.email,
+      name: credentials.role === 'admin' ? 'Admin User' : (studentName || 'Mock Student'),
+      role: credentials.role,
+      studentId: credentials.role === 'student' ? (studentName ? `SID-${emailPrefix}123` : 'SID-MOCK123') : undefined,
+    };
+    
+    setUser(mockUser);
+    localStorage.setItem('duesPayUser', JSON.stringify(mockUser));
+    
+    setIsLoading(false);
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('authToken');
     localStorage.removeItem('duesPayUser');
+    localStorage.removeItem('authToken');
     router.push('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading, error }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

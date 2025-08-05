@@ -20,15 +20,6 @@ const SignupSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
   role: z.enum(['student', 'admin'], { required_error: 'Please select a role.' }),
-  studentId: z.string().optional(),
-}).refine(data => {
-    if (data.role === 'student') {
-        return data.studentId && data.studentId.trim().length > 0;
-    }
-    return true;
-}, {
-    message: "Student ID is required for students.",
-    path: ["studentId"],
 });
 
 type SignupFormValues = z.infer<typeof SignupSchema>;
@@ -45,48 +36,30 @@ export default function SignupPage() {
       email: '',
       password: '',
       role: 'student',
-      studentId: ''
     },
   });
 
-  const selectedRole = form.watch('role');
-
-  const onSubmit = async (data: SignupFormValues) => {
+  const onSubmit = (data: SignupFormValues) => {
     setIsLoading(true);
     setError(null);
     
-    try {
-      const response = await fetch('http://localhost:4000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+    // Mock signup logic
+    console.log("Mock signup data:", data);
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to register.');
-      }
-      
-      toast({
-        title: 'Account Created!',
-        description: 'Your account has been successfully created. Please log in.',
-      });
-      
-      router.push('/login');
-
-    } catch (err: any) {
-       setError(err.message);
-       toast({
-        title: 'Registration Failed',
-        description: err.message,
-        variant: 'destructive',
-      });
-    } finally {
+    setTimeout(() => {
+      try {
+        // Simulate a successful registration
+        toast({
+          title: 'Account Created!',
+          description: 'Your account has been successfully created (mock). Please log in.',
+        });
+        router.push('/login');
+      } catch (err: any) {
+        setError(err.message || 'An unexpected error occurred.');
+      } finally {
         setIsLoading(false);
-    }
+      }
+    }, 1000);
   };
 
   return (
@@ -165,21 +138,6 @@ export default function SignupPage() {
                 <p className="text-sm text-destructive">{form.formState.errors.role.message}</p>
               )}
             </div>
-
-            {selectedRole === 'student' && (
-               <div className="space-y-2">
-                <Label htmlFor="studentId">Student ID</Label>
-                <Input
-                    id="studentId"
-                    placeholder="e.g., 10928456"
-                    {...form.register('studentId')}
-                    className={form.formState.errors.studentId ? 'border-destructive' : ''}
-                />
-                {form.formState.errors.studentId && (
-                    <p className="text-sm text-destructive">{form.formState.errors.studentId.message}</p>
-                )}
-                </div>
-            )}
             
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (

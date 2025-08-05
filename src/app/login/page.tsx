@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, Suspense } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/auth-context';
@@ -10,15 +10,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LogIn, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Simplified schema for login form, role is not needed anymore
 const LoginSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(1, { message: 'Password is required.' }),
+  password: z.string().min(1, { message: 'Password is required (any password will work for this mock).' }),
+  role: z.enum(['student', 'admin'], { required_error: 'Please select a role.' }),
 });
 
 type LoginFormValues = z.infer<typeof LoginSchema>;
@@ -35,21 +36,23 @@ function LoginForm() {
     defaultValues: {
       email: '',
       password: '',
+      role: 'student',
     },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit = (data: LoginFormValues) => {
     setIsLoading(true);
     setError(null);
     try {
-      await login({email: data.email, password: data.password});
-      
-      const redirectPath = searchParams.get('redirect');
-      router.push(redirectPath || '/');
-      
+      // Mock login doesn't need to be async, but we simulate it
+      setTimeout(() => {
+        login({ email: data.email, role: data.role });
+        const redirectPath = searchParams.get('redirect');
+        router.push(redirectPath || '/');
+        setIsLoading(false);
+      }, 500);
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -94,6 +97,27 @@ function LoginForm() {
             />
             {form.formState.errors.password && (
               <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="role">Role</Label>
+            <Controller
+              name="role"
+              control={form.control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <SelectTrigger id="role">
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="student">Student</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {form.formState.errors.role && (
+              <p className="text-sm text-destructive">{form.formState.errors.role.message}</p>
             )}
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
