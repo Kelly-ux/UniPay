@@ -20,6 +20,13 @@ const SignupSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
   role: z.enum(['student', 'admin'], { required_error: 'Please select a role.' }),
+  studentId: z.string().optional(),
+}).refine(data => {
+    // Student ID is required only if the role is 'student'
+    return data.role !== 'student' || (data.role === 'student' && data.studentId && data.studentId.trim().length > 0);
+}, {
+    message: "Student ID is required for the student role.",
+    path: ["studentId"], // path of error
 });
 
 type SignupFormValues = z.infer<typeof SignupSchema>;
@@ -36,8 +43,11 @@ export default function SignupPage() {
       email: '',
       password: '',
       role: 'student',
+      studentId: '',
     },
   });
+
+  const selectedRole = form.watch('role');
 
   const onSubmit = (data: SignupFormValues) => {
     setIsLoading(true);
@@ -139,6 +149,21 @@ export default function SignupPage() {
               )}
             </div>
             
+            {selectedRole === 'student' && (
+               <div className="space-y-2">
+                <Label htmlFor="studentId">Student ID</Label>
+                <Input
+                  id="studentId"
+                  placeholder="e.g., UENR-1234567"
+                  {...form.register('studentId')}
+                  className={form.formState.errors.studentId ? 'border-destructive' : ''}
+                />
+                {form.formState.errors.studentId && (
+                  <p className="text-sm text-destructive">{form.formState.errors.studentId.message}</p>
+                )}
+              </div>
+            )}
+
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
