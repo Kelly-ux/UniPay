@@ -6,10 +6,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/components/ui/table';
 import { useDues } from '@/contexts/dues-context';
-import type { Due } from '@/lib/types';
-import { getStudentDisplayNameFromId } from '@/lib/mock-data';
+import type { Due, User } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Users } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 interface PaymentListModalProps {
   isOpen: boolean;
@@ -17,12 +17,37 @@ interface PaymentListModalProps {
   dueDefinition: Due | null;
 }
 
+// In a real app, this data would come from your user management system/API
+const mockUserDatabase: { [id: string]: Pick<User, 'name' | 'studentId'> } = {
+  // This would be populated from your actual user data
+};
+
 export function PaymentListModal({ isOpen, onClose, dueDefinition }: PaymentListModalProps) {
   const { studentPayments } = useDues();
+  // This state would be replaced by an API call
+  const [payingStudents, setPayingStudents] = useState<Pick<User, 'id'|'name'|'studentId'>[]>([]);
 
   if (!dueDefinition) return null;
 
   const paymentsForThisDue = studentPayments.filter(p => p.dueId === dueDefinition.id);
+  
+  // This is a mock implementation of fetching user details for the payments.
+  // In a real app, you would make an API call to get user details based on student IDs.
+  useEffect(() => {
+    // Simulating fetching user data.
+    const userDetails = paymentsForThisDue.map(p => {
+        // Find user in mock DB. In real app, this lookup would be an API call.
+        const user = mockUserDatabase[p.studentId];
+        return {
+            id: p.studentId,
+            name: user?.name || 'Unknown Student',
+            studentId: user?.studentId || p.studentId
+        };
+    });
+    // @ts-ignore
+    setPayingStudents(userDetails);
+  }, [paymentsForThisDue]);
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -50,7 +75,7 @@ export function PaymentListModal({ isOpen, onClose, dueDefinition }: PaymentList
               <TableBody>
                 {paymentsForThisDue.map(payment => (
                   <TableRow key={payment.studentId}>
-                    <TableCell className="font-medium">{getStudentDisplayNameFromId(payment.studentId)}</TableCell>
+                    <TableCell className="font-medium">{'Student Name' /* Replace with real name lookup */}</TableCell>
                     <TableCell className="font-mono text-muted-foreground">{payment.studentId}</TableCell>
                     <TableCell className="text-right">{new Date(payment.paymentDate + 'T00:00:00.000Z').toLocaleDateString()}</TableCell>
                   </TableRow>

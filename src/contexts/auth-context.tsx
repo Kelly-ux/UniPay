@@ -4,13 +4,13 @@
 import type { User } from '@/lib/types';
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { studentNameMap } from '@/lib/mock-data'; // Import studentNameMap
 
 interface AuthContextType {
   user: User | null;
-  login: (userData: User) => void;
+  login: (credentials: {email: string, password: string}) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,52 +18,66 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     try {
-      const savedUser = localStorage.getItem('duesPayUser');
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        // In a real app, you would validate the token with the backend here.
+        // For this implementation, we will decode it.
+        const userData = JSON.parse(atob(token.split('.')[1]));
+        setUser(userData);
       }
-    } catch (error) {
-      console.error("Failed to parse user from localStorage", error);
-      localStorage.removeItem('duesPayUser');
+    } catch (e) {
+      console.error("Failed to parse user from token", e);
+      localStorage.removeItem('authToken');
     }
     setIsLoading(false);
   }, []);
 
-  const login = (userDataFromLoginPage: User) => {
-    // This function creates a more realistic mock user based on email.
-    // It's a bridge until a real backend provides user data.
-    let userToStore = { ...userDataFromLoginPage };
-    const emailPrefix = userToStore.email.split('@')[0].toLowerCase();
-    
-    // If the user logging in has a name we've mapped, use it for a better demo experience
-    if (userToStore.role === 'student') {
-        const mappedFullName = studentNameMap[emailPrefix];
-        if(mappedFullName) {
-            userToStore.name = mappedFullName;
-        }
-        // Assign a predictable ID for mock students so their payments can be tracked consistently.
-        userToStore.id = `mock-student-${emailPrefix}`;
-    } else if (userToStore.role === 'admin') {
-        userToStore.id = 'admin-user'; // Fixed ID for any admin user
-        userToStore.name = "Admin";
-    }
+  const login = async (credentials: {email: string, password: string}) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('http://localhost:4000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
 
-    setUser(userToStore);
-    localStorage.setItem('duesPayUser', JSON.stringify(userToStore));
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed.');
+      }
+      
+      const { user: loggedInUser, token } = data;
+      
+      setUser(loggedInUser);
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('duesPayUser', JSON.stringify(loggedInUser)); // For legacy compatibility if needed, can be removed later.
+
+    } catch (err: any) {
+      setError(err.message);
+      throw err; // Re-throw to be caught by the form
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('authToken');
     localStorage.removeItem('duesPayUser');
     router.push('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, error }}>
       {children}
     </AuthContext.Provider>
   );

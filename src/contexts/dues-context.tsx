@@ -6,6 +6,7 @@ import type { Due } from '@/lib/types';
 import { mockDuesInitial } from '@/lib/mock-data';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from './auth-context';
 
 export interface StudentPayment {
   studentId: string; // User ID
@@ -31,6 +32,7 @@ const STUDENT_PAYMENTS_STORAGE_KEY = 'duesPayStudentPayments';
 
 
 export const DuesProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useAuth(); // Use auth context
   const [dues, setDues] = useState<Due[]>(() => {
     if (typeof window !== 'undefined') {
       const savedDues = localStorage.getItem(DUES_DEFINITIONS_STORAGE_KEY);
@@ -59,6 +61,9 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
     return [];
   });
 
+  // TODO: Fetch dues and payments from backend API when user logs in.
+  // For now, we continue to use localStorage to persist mock data.
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem(DUES_DEFINITIONS_STORAGE_KEY, JSON.stringify(dues));
@@ -73,6 +78,7 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
 
 
   const addDue = useCallback((newDueData: Omit<Due, 'id'>) => {
+    // This will be replaced with an API call
     setDues((prevDues) => {
       const newId = (Math.max(0, ...prevDues.map(d => parseInt(d.id, 10) || 0)) + 1).toString();
       const dueDefinition: Due = {
@@ -84,9 +90,9 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const removeDue = useCallback((dueIdToRemove: string) => {
+    // This will be replaced with an API call
     const dueToRemove = dues.find(d => d.id === dueIdToRemove);
     setDues((prevDues) => prevDues.filter(due => due.id !== dueIdToRemove));
-    // Also remove any student payments associated with this due
     setStudentPayments((prevPayments) => prevPayments.filter(payment => payment.dueId !== dueIdToRemove));
     if (dueToRemove) {
         toast({
@@ -97,6 +103,7 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
   }, [dues]);
 
   const recordStudentPayment = useCallback((dueId: string, studentId: string) => {
+    // This will be replaced with an API call
     setStudentPayments((prevPayments) => {
       if (prevPayments.some(p => p.dueId === dueId && p.studentId === studentId)) {
         return prevPayments;

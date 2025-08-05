@@ -106,6 +106,11 @@ export function Header() {
                   <p className="text-xs leading-none text-muted-foreground">
                     {user.email}
                   </p>
+                  {user.role === 'student' && user.studentId && (
+                     <p className="text-xs leading-none text-muted-foreground pt-1">
+                        ID: {user.studentId}
+                    </p>
+                  )}
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />

@@ -55,22 +55,38 @@ export default function SignupPage() {
     setIsLoading(true);
     setError(null);
     
-    // In a real app, this would call the backend's /api/auth/register endpoint.
-    // For now, we'll just simulate a successful registration.
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch('http://localhost:4000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
 
-    // Here you would handle the response from your backend.
-    // e.g., const response = await fetch('/api/auth/register', { ... });
-    // const result = await response.json();
-    // if (!response.ok) { setError(result.message); setIsLoading(false); return; }
-    
-    console.log("Mock Registration successful for:", data);
-    toast({
-      title: 'Account Created!',
-      description: 'Your account has been successfully created. Please log in.',
-    });
-    
-    router.push('/login');
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to register.');
+      }
+      
+      toast({
+        title: 'Account Created!',
+        description: 'Your account has been successfully created. Please log in.',
+      });
+      
+      router.push('/login');
+
+    } catch (err: any) {
+       setError(err.message);
+       toast({
+        title: 'Registration Failed',
+        description: err.message,
+        variant: 'destructive',
+      });
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   return (

@@ -1,3 +1,4 @@
+
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import bcrypt from 'bcryptjs';
@@ -9,9 +10,11 @@ interface UserAttributes {
   passwordHash: string;
   name: string;
   role: 'student' | 'admin';
+  studentId?: string; // Add studentId as an optional attribute
 }
 
 // Interface for User creation attributes (password is not hashed yet)
+// studentId is also part of creation now.
 interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {
   password: string;
 }
@@ -22,6 +25,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public passwordHash!: string;
   public name!: string;
   public role!: 'student' | 'admin';
+  public studentId?: string;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -58,6 +62,11 @@ User.init(
     role: {
       type: DataTypes.ENUM('student', 'admin'),
       allowNull: false,
+    },
+    studentId: { // Define studentId column
+      type: DataTypes.STRING,
+      allowNull: true, // It's nullable because admins don't have one
+      unique: true, // Each student ID should be unique
     },
   },
   {

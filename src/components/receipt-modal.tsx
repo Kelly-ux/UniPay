@@ -13,7 +13,7 @@ interface ReceiptModalProps {
   onClose: () => void;
   due: Due | null; // Due Definition
   studentName: string;
-  studentId: string; // Added studentId prop
+  studentId: string; // studentId is now required
   paymentDate: string; // YYYY-MM-DD format
 }
 

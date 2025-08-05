@@ -34,7 +34,7 @@ export function DueCard({ due }: DueCardProps) {
   
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const [receiptStudentName, setReceiptStudentName] = useState<string | null>(null);
-  const [receiptStudentId, setReceiptStudentId] = useState<string | null>(null); // Added state for student ID
+  const [receiptStudentId, setReceiptStudentId] = useState<string | null>(null);
   const [receiptDueDetails, setReceiptDueDetails] = useState<Due | null>(null);
 
   const [isPaymentListModalOpen, setIsPaymentListModalOpen] = useState(false);
@@ -42,8 +42,6 @@ export function DueCard({ due }: DueCardProps) {
 
   // Helper function to create a UTC date from a 'YYYY-MM-DD' string
   const createUTCDate = (dateString: string) => {
-    // If the date string already contains time info, use it directly.
-    // Otherwise, append the time to ensure it's parsed as UTC midnight.
     if (dateString.includes('T')) {
         return new Date(dateString);
     }
@@ -51,7 +49,7 @@ export function DueCard({ due }: DueCardProps) {
   };
 
   const studentHasPaid = useMemo(() => {
-    if (!user || user.role !== 'student') return false; // Only students can have "paid" status for themselves
+    if (!user || user.role !== 'student') return false;
     return hasStudentPaid(due.id, user.id);
   }, [due.id, user, hasStudentPaid]);
 
@@ -61,17 +59,15 @@ export function DueCard({ due }: DueCardProps) {
   }, [due.id, user, studentHasPaid, getStudentPaymentDate]);
 
   const currentStatus: DueStatus = useMemo(() => {
-    // For consistent date comparison, treat "today" as the start of the day in UTC
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
     const dueDateObj = createUTCDate(due.dueDate);
     
-    if (user?.role === 'admin') { // Admins see a general status based on the due date
+    if (user?.role === 'admin') {
       return dueDateObj < today ? 'Overdue' : 'Unpaid';
     }
     
-    // For students:
     if (studentHasPaid) return 'Paid';
     if (dueDateObj < today) return 'Overdue';
     return 'Unpaid';
@@ -84,14 +80,14 @@ export function DueCard({ due }: DueCardProps) {
 
 
   const handlePayNow = async () => {
-    if (!user) {
+    if (!user || !user.studentId) {
       toast({ title: "Login Required", description: "Please log in to make a payment.", variant: "destructive" });
       return;
     }
     recordStudentPayment(due.id, user.id);
     
     setReceiptStudentName(user.name); 
-    setReceiptStudentId(user.id);
+    setReceiptStudentId(user.studentId);
     setReceiptDueDetails(due); 
     setIsReceiptModalOpen(true);
 
@@ -115,7 +111,7 @@ export function DueCard({ due }: DueCardProps) {
       <Card className="flex flex-col h-full shadow-lg hover:shadow-primary/10 transition-shadow duration-300 bg-card text-card-foreground overflow-hidden border border-border rounded-xl">
         <div className="relative w-full h-40">
           <Image 
-            src={`https://placehold.co/600x240.png`}
+            src={`https://placehold.co/600x240/64B5F6/FFFFFF.png?text=`}
             alt={`${due.school} ${due.department}`}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -160,11 +156,11 @@ export function DueCard({ due }: DueCardProps) {
               Pay Now
             </Button>
           )}
-          {user?.role === 'student' && currentStatus === 'Paid' && user && (
+          {user?.role === 'student' && currentStatus === 'Paid' && user && user.studentId && (
              <Button 
                 onClick={() => {
                     setReceiptStudentName(user.name);
-                    setReceiptStudentId(user.id);
+                    setReceiptStudentId(user.studentId!);
                     setReceiptDueDetails(due);
                     setIsReceiptModalOpen(true);
                 }} 
