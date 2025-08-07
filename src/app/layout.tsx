@@ -21,8 +21,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn(GeistSans.variable)} suppressHydrationWarning>
-      <body className="antialiased bg-background text-foreground min-h-screen flex flex-col">
+    <html lang="en" suppressHydrationWarning>
+      <body className={cn(GeistSans.className, "antialiased bg-background text-foreground min-h-screen flex flex-col")}>
         <AuthProvider>
           <DuesProvider>
             <Header />
