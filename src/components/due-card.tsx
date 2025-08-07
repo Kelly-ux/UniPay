@@ -5,8 +5,7 @@ import type { Due, DueStatus } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, CheckCircle2, Info, Mail, School, Building, CalendarDays, CreditCard, Trash2, Eye } from 'lucide-react';
-import Link from 'next/link';
+import { AlertTriangle, CheckCircle2, Info, School, Building, CalendarDays, CreditCard, Trash2, Eye } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/auth-context';
@@ -76,9 +75,6 @@ export function DueCard({ due }: DueCardProps) {
   const { icon: StatusIcon, badgeVariant, textColorClass, iconColorClass, badgeBgClass } = statusStyles[currentStatus];
   const formattedAmount = new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(due.amount);
   
-  const reminderLink = `/admin/generate-reminder?dueAmount=${due.amount}&dueDate=${due.dueDate}&schoolName=${encodeURIComponent(due.school)}&departmentName=${encodeURIComponent(due.department)}&paymentMethod=${encodeURIComponent(due.paymentMethodSuggestion || 'University Payment Portal')}&description=${encodeURIComponent(due.description)}`;
-
-
   const handlePayNow = async () => {
     if (!user || !user.studentId) {
       toast({ title: "Login Required", description: "Please log in to make a payment.", variant: "destructive" });
@@ -111,7 +107,7 @@ export function DueCard({ due }: DueCardProps) {
       <Card className="flex flex-col h-full shadow-lg hover:shadow-primary/10 transition-shadow duration-300 bg-card text-card-foreground overflow-hidden border border-border rounded-xl">
         <div className="relative w-full h-40">
           <Image 
-            src={`https://placehold.co/600x240/64B5F6/FFFFFF?text=`}
+             src={`https://placehold.co/600x240/64B5F6/FFFFFF?text=`}
             alt={`${due.school} ${due.department}`}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -176,12 +172,6 @@ export function DueCard({ due }: DueCardProps) {
             <div className="w-full flex flex-col sm:flex-row sm:flex-wrap gap-2">
               <Button onClick={handleViewPayments} variant="outline" size="sm" className="flex-1 min-w-[140px] hover:bg-blue-50 hover:text-blue-700 border-blue-500 text-blue-600">
                 <Eye className="mr-2 h-4 w-4" /> View Payments
-              </Button>
-              <Button asChild variant="outline" size="sm" className="flex-1 min-w-[140px] hover:bg-accent hover:text-accent-foreground border-primary/50 text-primary hover:border-primary">
-                <Link href={reminderLink}>
-                  <Mail className="mr-2 h-4 w-4" />
-                  Gen. Reminder
-                </Link>
               </Button>
               <Button 
                 onClick={handleRemoveDue} 

@@ -30,7 +30,6 @@ const studentNavItems = [
 
 // Admin specific nav items (to be shown in addition to base)
 const adminNavItems = [
-   { href: '/admin/generate-reminder', label: 'Generate Reminder', icon: Menu }, // Example, can refine icon
    { href: '/admin', label: 'Admin Panel', icon: ShieldCheck },
 ];
 
@@ -43,8 +42,6 @@ export function Header() {
   if (user?.role === 'student') {
     navItems = [...navItems, ...studentNavItems];
   } else if (user?.role === 'admin') {
-    // Admins see base, and admin specific links. Admin panel itself is in dropdown.
-    // Let's add generate-reminder here too for admins.
      navItems = [...navItems, ...adminNavItems.filter(item => item.href !== '/admin')]; // Exclude admin panel itself from main nav
   }
 
