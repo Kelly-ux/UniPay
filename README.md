@@ -1,15 +1,31 @@
-<<<<<<< HEAD
+---
 
 # DuesPay - University Payment Management
 
 DuesPay is a web application designed to streamline the management of university dues and payments for both students and administrators. This project serves as a comprehensive Next.js starter application, showcasing various modern web development practices and integrations.
 
-=======
-# UniPay - University Payment Management
+---
 
-UniPay is a web application designed to streamline the management of university dues and payments for both students and administrators. This project serves as a comprehensive Next.js starter application, showcasing various modern web development practices and integrations.
+## Table of Contents
 
->>>>>>> 923e8ed64bfe9d9d199eb9217b02931b67089204
+*   [About the Project](#about-the-project)
+*   [Tech Stack](#tech-stack)
+*   [Project Structure](#project-structure)
+*   [Getting Started](#getting-started)
+    *   [Prerequisites](#prerequisites)
+    *   [Installation](#installation)
+    *   [Environment Variables](#environment-variables)
+    *   [Running the Application](#running-the-application)
+*   [Key Features](#key-features)
+*   [Authentication (Mock Implementation)](#authentication-mock-implementation)
+*   [State Management](#state-management)
+*   [AI Features (Genkit)](#ai-features-genkit)
+*   [Styling](#styling)
+*   [Important Files & Modules](#important-files--modules)
+*   [Future Enhancements](#future-enhancements)
+*   [Contributing](#contributing)
+
+DuesPay is a web application designed to streamline the management of university dues and payments for both students and administrators. This project serves as a comprehensive Next.js starter application, showcasing various modern web development practices and integrations.
 ## Tech Stack
 
 *   **Framework:** Next.js (App Router)
@@ -23,6 +39,27 @@ UniPay is a web application designed to streamline the management of university 
 *   **Utilities:** Lucide Icons, date-fns, clsx, tailwind-merge, jsPDF
 
 ## Project Structure
+
+## About the Project
+
+UniPay is a web application designed to facilitate the management of university dues and payments. It provides interfaces for both students to view and manage their assigned dues and payment history, and for administrators to define dues, track payments, and generate reminders.
+
+This project serves as a starter template built with modern web technologies, demonstrating concepts such as:
+
+*   Server-side rendering with Next.js App Router.
+*   Component-based UI development with React.
+*   Styling with Tailwind CSS and ShadCN UI.
+*   State management using React Context API.
+*   Form handling and validation.
+*   AI integration with Genkit.
+
+**Note:** The current version utilizes mock data and a mock authentication system for demonstration purposes. A real backend integration is planned for future development.
+
+## Tech Stack
+
+The project is built using the following key technologies:
+
+*   **Framework:** Next.js (App Router)
 
 A brief overview of important directories:
 
@@ -39,6 +76,19 @@ A brief overview of important directories:
 *   `src/lib/`: Utility functions, type definitions, schemas, and mock data.
 *   `public/`: Static assets.
 
+For the planned backend development, the following technologies are intended to be used:
+
+*   **Framework:** Express.js
+*   **Language:** TypeScript
+*   **Database ORM:** Sequelize
+*   **Database:** PostgreSQL
+*   **Authentication:** JWT, bcryptjs
+
+## Project Structure
+
+A brief overview of the project's directory structure:
+
+*   `src/app/`: Contains all pages, layouts, and route-specific components using the Next.js App Router.
 ## Getting Started
 
 ### Prerequisites
@@ -46,6 +96,7 @@ A brief overview of important directories:
 *   Node.js (v18 or later recommended)
 *   npm, yarn, or pnpm
 
+*   A PostgreSQL database instance (for future backend integration)
 ### Installation
 
 1.  Clone the repository (if applicable, otherwise start with the existing project files).
@@ -56,6 +107,7 @@ A brief overview of important directories:
     yarn install
     # or
     pnpm install
+
     ```
 
 ### Environment Variables
