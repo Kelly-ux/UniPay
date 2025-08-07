@@ -105,7 +105,7 @@ export function DueCard({ due }: DueCardProps) {
       <Card className="flex flex-col h-full shadow-lg hover:shadow-primary/10 transition-shadow duration-300 bg-card text-card-foreground overflow-hidden border border-border rounded-xl">
         <div className="relative w-full h-40">
           <Image 
-            src={`https://placehold.co/600x240/64B5F6/FFFFFF?text=`}
+            src="https://images.unsplash.com/photo-1613243555988-441166d4d6fd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjcmVkaXQlMjBjYXJkfGVufDB8fHx8MTc1NDU2Nzk2M3ww&ixlib=rb-4.1.0&q=80&w=1080"
             alt={`${due.school} ${due.department}`}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
