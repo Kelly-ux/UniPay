@@ -19,30 +19,14 @@ DuesPay is a web application designed to streamline the management of university
 *   [Key Features](#key-features)
 *   [Authentication (Mock Implementation)](#authentication-mock-implementation)
 *   [State Management](#state-management)
-*   [AI Features (Genkit)](#ai-features-genkit)
 *   [Styling](#styling)
 *   [Important Files & Modules](#important-files--modules)
 *   [Future Enhancements](#future-enhancements)
 *   [Contributing](#contributing)
 
-DuesPay is a web application designed to streamline the management of university dues and payments for both students and administrators. This project serves as a comprehensive Next.js starter application, showcasing various modern web development practices and integrations.
-## Tech Stack
-
-*   **Framework:** Next.js (App Router)
-*   **Language:** TypeScript
-*   **UI:** React
-*   **Styling:** Tailwind CSS
-*   **UI Components:** ShadCN UI
-*   **AI Integration:** Genkit (for AI-powered features like payment reminders)
-*   **State Management:** React Context API (`AuthContext`, `DuesContext`)
-*   **Form Handling:** React Hook Form with Zod for validation
-*   **Utilities:** Lucide Icons, date-fns, clsx, tailwind-merge, jsPDF
-
-## Project Structure
-
 ## About the Project
 
-UniPay is a web application designed to facilitate the management of university dues and payments. It provides interfaces for both students to view and manage their assigned dues and payment history, and for administrators to define dues, track payments, and generate reminders.
+DuesPay is a web application designed to facilitate the management of university dues and payments. It provides interfaces for both students to view and manage their assigned dues and payment history, and for administrators to define dues and track payments.
 
 This project serves as a starter template built with modern web technologies, demonstrating concepts such as:
 
@@ -51,7 +35,6 @@ This project serves as a starter template built with modern web technologies, de
 *   Styling with Tailwind CSS and ShadCN UI.
 *   State management using React Context API.
 *   Form handling and validation.
-*   AI integration with Genkit.
 
 **Note:** The current version utilizes mock data and a mock authentication system for demonstration purposes. A real backend integration is planned for future development.
 
@@ -60,21 +43,13 @@ This project serves as a starter template built with modern web technologies, de
 The project is built using the following key technologies:
 
 *   **Framework:** Next.js (App Router)
-
-A brief overview of important directories:
-
-*   `src/app/`: Contains all pages, layouts, and route-specific components using the Next.js App Router.
-    *   `src/app/admin/`: Admin-specific pages.
-    *   `src/app/login/`: Login page.
-    *   `src/app/payment-history/`: Student payment history page.
-*   `src/components/`: Shared UI components used across the application.
-    *   `src/components/ui/`: ShadCN UI components.
-*   `src/contexts/`: React Context providers for global state management (`AuthContext`, `DuesContext`).
-*   `src/ai/`: Genkit related files.
-    *   `src/ai/flows/`: Genkit flows for AI functionalities.
-    *   `src/ai/genkit.ts`: Genkit global instance configuration.
-*   `src/lib/`: Utility functions, type definitions, schemas, and mock data.
-*   `public/`: Static assets.
+*   **Language:** TypeScript
+*   **UI:** React
+*   **Styling:** Tailwind CSS
+*   **UI Components:** ShadCN UI
+*   **State Management:** React Context API (`AuthContext`, `DuesContext`)
+*   **Form Handling:** React Hook Form with Zod for validation
+*   **Utilities:** Lucide Icons, date-fns, clsx, tailwind-merge, jsPDF
 
 For the planned backend development, the following technologies are intended to be used:
 
@@ -84,19 +59,29 @@ For the planned backend development, the following technologies are intended to 
 *   **Database:** PostgreSQL
 *   **Authentication:** JWT, bcryptjs
 
+
 ## Project Structure
 
 A brief overview of the project's directory structure:
 
 *   `src/app/`: Contains all pages, layouts, and route-specific components using the Next.js App Router.
+    *   `src/app/admin/`: Admin-specific pages.
+    *   `src/app/login/`: Login page.
+    *   `src/app/payment-history/`: Student payment history page.
+*   `src/components/`: Shared UI components used across the application.
+    *   `src/components/ui/`: ShadCN UI components.
+*   `src/contexts/`: React Context providers for global state management (`AuthContext`, `DuesContext`).
+*   `src/lib/`: Utility functions, type definitions, schemas, and mock data.
+*   `public/`: Static assets.
+
 ## Getting Started
 
 ### Prerequisites
 
 *   Node.js (v18 or later recommended)
 *   npm, yarn, or pnpm
-
 *   A PostgreSQL database instance (for future backend integration)
+
 ### Installation
 
 1.  Clone the repository (if applicable, otherwise start with the existing project files).
@@ -107,38 +92,19 @@ A brief overview of the project's directory structure:
     yarn install
     # or
     pnpm install
-
     ```
 
 ### Environment Variables
 
-Create a `.env` file in the root of the project. This file is used for environment-specific configurations, especially API keys for AI services.
+Create a `.env` file in the root of the project. This file is used for environment-specific configurations.
 
-Example `.env` content:
-
-```env
-# For Google AI Studio / Gemini models used with Genkit
-# GOOGLE_API_KEY=YOUR_GOOGLE_AI_API_KEY
-```
-
-Replace `YOUR_GOOGLE_AI_API_KEY` with your actual API key if you plan to use the AI features.
-
-## Running the Application
+### Running the Application
 
 1.  **Run the Next.js development server:**
     ```bash
     npm run dev
     ```
     The application will typically be available at `http://localhost:9002`.
-
-2.  **Run the Genkit development server (for AI features):**
-    Open a new terminal and run:
-    ```bash
-    npm run genkit:dev
-    # or for auto-reloading on changes:
-    npm run genkit:watch
-    ```
-    The Genkit server usually starts on `http://localhost:4000` by default and provides a development UI to inspect flows and prompts.
 
 ## Key Features
 
@@ -149,7 +115,6 @@ Replace `YOUR_GOOGLE_AI_API_KEY` with your actual API key if you plan to use the
 *   **Admin Panel:** Centralized dashboard for administrators.
 *   **Admin Due Definition Management:** Admins can add new due definitions for school departments and remove existing ones.
 *   **Admin View of Paid Students:** Admins can view a list of students who have paid for a specific due.
-*   **AI-Powered Payment Reminder Generation:** Admins can use Genkit to generate personalized or general payment reminders.
 *   **Role-Based Authentication (Mocked):** Separate experiences for 'student' and 'admin' roles.
 *   **Light/Dark Theme:** The application uses a light theme by default with support for dark mode styling (though a theme switcher is not yet implemented).
 
@@ -172,19 +137,6 @@ Authentication is currently mocked for demonstration purposes:
     *   Provides functions to add/remove due definitions (admin) and record student payments.
 *   **Persistence:** Due definitions and student payments (mock data) are persisted in `localStorage` to simulate a database across sessions.
 
-## AI Features (Genkit)
-
-The application uses Genkit to integrate AI functionalities, specifically for generating payment reminders.
-
-*   **Reminder Flow (`src/ai/flows/generate-payment-reminder.ts`):**
-    *   This server-side flow uses a Genkit prompt to generate reminder text based on input like due amount, due date, student name (optional), school, department, etc.
-*   **Genkit Configuration (`src/ai/genkit.ts`):**
-    *   Initializes the global `ai` object and configures plugins (e.g., `googleAI()`).
-    *   Specifies the default model (e.g., `googleai/gemini-2.0-flash`).
-*   **Admin Reminder Page (`src/app/admin/generate-reminder/page.tsx`):**
-    *   Provides a form for admins to input details and trigger the AI reminder generation.
-*   **Running Genkit:** Ensure the Genkit server (`npm run genkit:dev` or `npm run genkit:watch`) is running to use these AI features.
-
 ## Styling
 
 *   **ShadCN UI:** Leverages pre-built, accessible, and customizable components from `src/components/ui/`.
@@ -199,8 +151,6 @@ The application uses Genkit to integrate AI functionalities, specifically for ge
 *   **`src/contexts/dues-context.tsx`:** Manages dues and payment data.
 *   **`src/lib/mock-data.ts`:** Defines core data structures (like `Due`, `StudentPayment`), initial mock data, and helper functions for mock user data.
 *   **`src/components/due-card.tsx`:** Displays individual due items and handles payment/admin actions.
-*   **`src/components/reminder-form.tsx`:** The form used by admins to generate AI payment reminders.
-*   **`src/ai/flows/generate-payment-reminder.ts`:** The Genkit flow for the AI reminder feature.
 
 ## Future Enhancements (Potential Roadmap)
 
@@ -226,8 +176,4 @@ Contributions are welcome! Please follow standard coding practices. Ensure code 
 
 ---
 
-<<<<<<< HEAD
 This README aims to provide a good starting point for developers working on or learning from the DuesPay application.
-=======
-This README aims to provide a good starting point for developers working on or learning from the UniPay application.
->>>>>>> 923e8ed64bfe9d9d199eb9217b02931b67089204
