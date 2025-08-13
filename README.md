@@ -72,7 +72,7 @@ A brief overview of the project's directory structure:
     *   `src/components/ui/`: ShadCN UI components.
 *   `src/contexts/`: React Context providers for global state management (`AuthContext`, `DuesContext`).
 *   `src/lib/`: Utility functions, type definitions, schemas, and mock data.
-*   `public/`: Static assets.
+*   `public/`: Static assets (e.g., images).
 
 ## Getting Started
 
