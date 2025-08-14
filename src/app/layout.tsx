@@ -13,6 +13,7 @@ import { DuesProvider } from '@/contexts/dues-context';
 export const metadata: Metadata = {
   title: 'DuesPay - University Payment Management',
   description: 'Manage your university dues and payments effortlessly with DuesPay.',
+  icons: null,
 };
 
 export default function RootLayout({
