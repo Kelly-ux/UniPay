@@ -6,9 +6,16 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { useRouter } from 'next/navigation';
 import { studentNameMap } from '@/lib/mock-data';
 
+// Update login credentials to include studentId
+interface LoginCredentials {
+  email: string;
+  role: 'student' | 'admin';
+  studentId?: string;
+}
+
 interface AuthContextType {
   user: User | null;
-  login: (credentials: {email: string, role: 'student' | 'admin'}) => void;
+  login: (credentials: LoginCredentials) => void;
   logout: () => void;
   isLoading: boolean;
 }
@@ -34,7 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
   }, []);
 
-  const login = (credentials: {email: string, role: 'student' | 'admin'}) => {
+  const login = (credentials: LoginCredentials) => {
     setIsLoading(true);
 
     // Mock authentication logic
@@ -46,7 +53,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       email: credentials.email,
       name: credentials.role === 'admin' ? 'Admin User' : (studentName || 'Mock Student'),
       role: credentials.role,
-      studentId: credentials.role === 'student' ? (studentName ? `SID-${emailPrefix}123` : 'SID-MOCK123') : undefined,
+      // Use the studentId from credentials if provided, otherwise fallback to mock generation.
+      studentId: credentials.role === 'student' ? credentials.studentId : undefined,
     };
     
     setUser(mockUser);

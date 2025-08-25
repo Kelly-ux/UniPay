@@ -20,7 +20,15 @@ const LoginSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(1, { message: 'Password is required (any password will work for this mock).' }),
   role: z.enum(['student', 'admin'], { required_error: 'Please select a role.' }),
+  studentId: z.string().optional(), // Student ID is now part of the login form
+}).refine(data => {
+    // Student ID is required only if the role is 'student'
+    return data.role !== 'student' || (data.role === 'student' && data.studentId && data.studentId.trim().length > 0);
+}, {
+    message: "Student ID is required for the student role.",
+    path: ["studentId"],
 });
+
 
 type LoginFormValues = z.infer<typeof LoginSchema>;
 
@@ -37,8 +45,11 @@ function LoginForm() {
       email: '',
       password: '',
       role: 'student',
+      studentId: '',
     },
   });
+
+  const selectedRole = form.watch('role');
 
   const onSubmit = (data: LoginFormValues) => {
     setIsLoading(true);
@@ -46,7 +57,8 @@ function LoginForm() {
     try {
       // Mock login doesn't need to be async, but we simulate it
       setTimeout(() => {
-        login({ email: data.email, role: data.role });
+        // Pass the full data object to the login function
+        login({ email: data.email, role: data.role, studentId: data.studentId });
         const redirectPath = searchParams.get('redirect');
         router.push(redirectPath || '/');
         setIsLoading(false);
@@ -122,6 +134,23 @@ function LoginForm() {
               <p className="text-sm text-destructive">{form.formState.errors.role.message}</p>
             )}
           </div>
+          
+          {/* Student ID field visible when role is student */}
+          {selectedRole === 'student' && (
+             <div className="space-y-2">
+              <Label htmlFor="studentId">Student ID</Label>
+              <Input
+                id="studentId"
+                placeholder="UENR12345678"
+                {...form.register('studentId')}
+                className={form.formState.errors.studentId ? 'border-destructive' : ''}
+              />
+              {form.formState.errors.studentId && (
+                <p className="text-sm text-destructive">{form.formState.errors.studentId.message}</p>
+              )}
+            </div>
+          )}
+          
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               <>
