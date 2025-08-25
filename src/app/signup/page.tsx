@@ -154,7 +154,7 @@ export default function SignupPage() {
                 <Label htmlFor="studentId">Student ID</Label>
                 <Input
                   id="studentId"
-                  placeholder="e.g., UENR-1234567"
+                  placeholder="UENR12345678"
                   {...form.register('studentId')}
                   className={form.formState.errors.studentId ? 'border-destructive' : ''}
                 />
