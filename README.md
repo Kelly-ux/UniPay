@@ -104,6 +104,22 @@ Required for backend integration:
 NEXT_PUBLIC_API_BASE_URL=https://your-backend.example.com
 ```
 
+Supabase (if using Supabase backend):
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_ANON_KEY
+# Optional server-only key for server actions / migrations
+# SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
+```
+
+### Supabase setup
+
+1. Create a Supabase project, get your project URL and anon key.
+2. Apply the SQL in `supabase/schema.sql` to your database (via SQL editor or migrations).
+3. Create at least one admin user and set `profiles.is_admin = true` for that user.
+4. Set the environment variables above and run the app.
+
 ### Running the Application
 
 1.  **Run the Next.js development server:**

@@ -4,8 +4,8 @@
 import type { User } from '@/lib/types';
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuthApi } from '@/lib/api';
-import { isApiConfigured } from '@/lib/env';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import type { ProfileRow } from '@/lib/supabase/mappers';
 
 // Update login credentials to include studentId
 interface LoginCredentials {
@@ -53,31 +53,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (credentials: LoginCredentials) => {
     setIsLoading(true);
     try {
-      if (isApiConfigured()) {
-        const resp = await AuthApi.login({
-          email: credentials.email,
-          password: credentials.password,
-          role: credentials.role,
-          studentId: credentials.studentId,
-        });
-        setUser(resp.user);
-        setToken(resp.token);
-        localStorage.setItem('duesPayUser', JSON.stringify(resp.user));
-        localStorage.setItem('duesPayToken', resp.token);
-      } else {
-        // Development fallback without mock-data mapping
-        const devUser: User = {
-          id: credentials.email,
-          email: credentials.email,
-          name: credentials.email.split('@')[0],
-          role: credentials.role,
-          studentId: credentials.role === 'student' ? credentials.studentId : undefined,
-        };
-        setUser(devUser);
-        setToken(null);
-        localStorage.setItem('duesPayUser', JSON.stringify(devUser));
-        localStorage.removeItem('duesPayToken');
-      }
+      const supabase = createSupabaseBrowserClient();
+      const { data: signIn, error } = await supabase.auth.signInWithPassword({
+        email: credentials.email,
+        password: credentials.password,
+      });
+      if (error) throw error;
+      const session = signIn.session;
+      if (!session) throw new Error('No session returned');
+
+      const authUser = session.user;
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single<ProfileRow>();
+
+      const mappedUser: User = {
+        id: authUser.id,
+        email: authUser.email || credentials.email,
+        name: profile?.name || authUser.email?.split('@')[0] || 'User',
+        role: credentials.role, // role gating comes from RLS; optionally map from profile.is_admin
+        studentId: profile?.student_id || (credentials.role === 'student' ? credentials.studentId : undefined),
+      };
+
+      setUser(mappedUser);
+      setToken(session.access_token);
+      localStorage.setItem('duesPayUser', JSON.stringify(mappedUser));
+      localStorage.setItem('duesPayToken', session.access_token);
     } finally {
       setIsLoading(false);
     }
