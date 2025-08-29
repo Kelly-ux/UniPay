@@ -96,7 +96,13 @@ A brief overview of the project's directory structure:
 
 ### Environment Variables
 
-Create a `.env` file in the root of the project. This file is used for environment-specific configurations.
+Create a `.env` file in the root of the project (see `.env.example`).
+
+Required for backend integration:
+
+```
+NEXT_PUBLIC_API_BASE_URL=https://your-backend.example.com
+```
 
 ### Running the Application
 
@@ -155,8 +161,15 @@ Authentication is currently mocked for demonstration purposes:
 ## Future Enhancements (Potential Roadmap)
 
 *   **Backend Integration:**
-    *   Replace mock authentication with a real backend service (e.g., Firebase Authentication, custom JWT-based auth).
-    *   Store user data, due definitions, and payment records in a persistent database (e.g., Firestore, PostgreSQL).
+    *   App now supports token-based login and API-driven dues/payments when `NEXT_PUBLIC_API_BASE_URL` is set.
+    *   Replace the development fallback fully by providing a production backend implementing these endpoints:
+        - `POST /auth/login` -> `{ token, user }`
+        - `GET /auth/me` -> `user`
+        - `GET /dues` -> `Due[]`
+        - `POST /dues` -> `Due`
+        - `DELETE /dues/:id`
+        - `GET /dues/:id/payments` -> `StudentPayment[]`
+        - `POST /dues/:id/pay` -> `StudentPayment`
 *   **Real Payment Gateway Integration:**
     *   Integrate with services like Paystack, Flutterwave, or Stripe to process actual payments.
 *   **Student Profile Management:** Allow students to view and manage their profile information.
