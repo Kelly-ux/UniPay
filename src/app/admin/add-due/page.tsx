@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AuthGuard } from '@/components/auth-guard';
 import { useDues } from '@/contexts/dues-context';
-import { schoolAndDepartmentData } from '@/lib/mock-data';
+import { schoolAndDepartmentData } from '@/lib/constants';
 import { toast } from '@/hooks/use-toast';
 import { CalendarIcon, FilePlus, Building, SchoolIcon as SchoolLucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';

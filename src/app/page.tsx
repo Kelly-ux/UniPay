@@ -5,7 +5,7 @@ import React, { useState, useMemo } from 'react';
 import { DueFilters } from '@/components/due-filters';
 import { DueCard } from '@/components/due-card';
 import type { Due } from '@/lib/types';
-import { uniqueSchools, uniqueDepartments, dueStatuses } from '@/lib/mock-data';
+import { dueStatuses } from '@/lib/constants';
 import { Frown } from 'lucide-react';
 import { AuthGuard } from '@/components/auth-guard';
 import { useDues } from '@/contexts/dues-context';

@@ -18,7 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const LoginSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
-  password: z.string().min(1, { message: 'Password is required (any password will work for this mock).' }),
+  password: z.string().min(1, { message: 'Password is required.' }),
   role: z.enum(['student', 'admin'], { required_error: 'Please select a role.' }),
   studentId: z.string().optional(), // Student ID is now part of the login form
 }).refine(data => {
@@ -55,14 +55,14 @@ function LoginForm() {
     setIsLoading(true);
     setError(null);
     try {
-      // Mock login doesn't need to be async, but we simulate it
-      setTimeout(() => {
-        // Pass the full data object to the login function
-        login({ email: data.email, role: data.role, studentId: data.studentId });
+      Promise.resolve(
+        login({ email: data.email, password: data.password, role: data.role, studentId: data.studentId })
+      ).then(() => {
         const redirectPath = searchParams.get('redirect');
         router.push(redirectPath || '/');
-        setIsLoading(false);
-      }, 500);
+      }).catch((err) => {
+        setError(err?.message || 'Login failed');
+      }).finally(() => setIsLoading(false));
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
       setIsLoading(false);

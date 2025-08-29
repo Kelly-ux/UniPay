@@ -2,17 +2,14 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import type { Due } from '@/lib/types';
-import { mockDuesInitial } from '@/lib/mock-data';
+import type { Due, StudentPayment } from '@/lib/types';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from './auth-context';
+import { DuesApi, PaymentsApi } from '@/lib/api';
+import { isApiConfigured } from '@/lib/env';
 
-export interface StudentPayment {
-  studentId: string; // User ID
-  dueId: string;     // Due definition ID
-  paymentDate: string; // YYYY-MM-DD
-}
+// StudentPayment moved to shared types
 
 interface DuesContextType {
   dues: Due[]; // Due definitions
@@ -32,78 +29,115 @@ const STUDENT_PAYMENTS_STORAGE_KEY = 'duesPayStudentPayments';
 
 
 export const DuesProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuth(); // Use auth context
+  const { user, token } = useAuth();
   const [dues, setDues] = useState<Due[]>(() => {
     if (typeof window !== 'undefined') {
       const savedDues = localStorage.getItem(DUES_DEFINITIONS_STORAGE_KEY);
       try {
-        return savedDues ? JSON.parse(savedDues) : mockDuesInitial;
+        return savedDues ? JSON.parse(savedDues) : [];
       } catch (e) {
         console.error("Failed to parse dues from localStorage", e);
-        localStorage.removeItem(DUES_DEFINITIONS_STORAGE_KEY); // Clear corrupted data
-        return mockDuesInitial;
-      }
-    }
-    return mockDuesInitial;
-  });
-
-  const [studentPayments, setStudentPayments] = useState<StudentPayment[]>(() => {
-     if (typeof window !== 'undefined') {
-      const savedPayments = localStorage.getItem(STUDENT_PAYMENTS_STORAGE_KEY);
-      try {
-        return savedPayments ? JSON.parse(savedPayments) : [];
-      } catch (e) {
-        console.error("Failed to parse student payments from localStorage", e);
-        localStorage.removeItem(STUDENT_PAYMENTS_STORAGE_KEY); // Clear corrupted data
+        localStorage.removeItem(DUES_DEFINITIONS_STORAGE_KEY);
         return [];
       }
     }
     return [];
   });
 
-  // TODO: Fetch dues and payments from backend API when user logs in.
-  // For now, we continue to use localStorage to persist mock data.
+  const [studentPayments, setStudentPayments] = useState<StudentPayment[]>(() => {
+    if (typeof window !== 'undefined') {
+      const savedPayments = localStorage.getItem(STUDENT_PAYMENTS_STORAGE_KEY);
+      try {
+        return savedPayments ? JSON.parse(savedPayments) : [];
+      } catch (e) {
+        console.error("Failed to parse student payments from localStorage", e);
+        localStorage.removeItem(STUDENT_PAYMENTS_STORAGE_KEY);
+        return [];
+      }
+    }
+    return [];
+  });
+
+  // Fetch dues and payments from backend API when configured
+  useEffect(() => {
+    const canUseApi = isApiConfigured();
+    if (!canUseApi) return;
+    const fetchData = async () => {
+      try {
+        const [duesResp, paymentsResp] = await Promise.all([
+          DuesApi.listDues(token),
+          PaymentsApi.listAllPayments(token),
+        ]);
+        setDues(duesResp || []);
+        setStudentPayments(paymentsResp || []);
+      } catch (err) {
+        console.error('Failed to fetch dues/payments from API', err);
+      }
+    };
+    fetchData();
+  }, [token]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (!isApiConfigured() && typeof window !== 'undefined') {
       localStorage.setItem(DUES_DEFINITIONS_STORAGE_KEY, JSON.stringify(dues));
     }
   }, [dues]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (!isApiConfigured() && typeof window !== 'undefined') {
       localStorage.setItem(STUDENT_PAYMENTS_STORAGE_KEY, JSON.stringify(studentPayments));
     }
   }, [studentPayments]);
 
 
-  const addDue = useCallback((newDueData: Omit<Due, 'id'>) => {
-    // This will be replaced with an API call
+  const addDue = useCallback(async (newDueData: Omit<Due, 'id'>) => {
+    if (isApiConfigured()) {
+      try {
+        const created = await DuesApi.addDue(newDueData, token);
+        setDues((prev) => [...prev, created]);
+      } catch (err) {
+        console.error('Failed to add due via API', err);
+      }
+      return;
+    }
     setDues((prevDues) => {
       const newId = (Math.max(0, ...prevDues.map(d => parseInt(d.id, 10) || 0)) + 1).toString();
-      const dueDefinition: Due = {
-        ...newDueData,
-        id: newId,
-      };
+      const dueDefinition: Due = { ...newDueData, id: newId };
       return [...prevDues, dueDefinition];
     });
-  }, []);
+  }, [token]);
 
-  const removeDue = useCallback((dueIdToRemove: string) => {
-    // This will be replaced with an API call
+  const removeDue = useCallback(async (dueIdToRemove: string) => {
     const dueToRemove = dues.find(d => d.id === dueIdToRemove);
+    if (isApiConfigured()) {
+      try {
+        await DuesApi.removeDue(dueIdToRemove, token);
+      } catch (err) {
+        console.error('Failed to remove due via API', err);
+      }
+    }
     setDues((prevDues) => prevDues.filter(due => due.id !== dueIdToRemove));
     setStudentPayments((prevPayments) => prevPayments.filter(payment => payment.dueId !== dueIdToRemove));
     if (dueToRemove) {
-        toast({
-            title: "Due Removed",
-            description: `The due "${dueToRemove.description}" has been successfully removed.`,
-        });
+      toast({
+        title: "Due Removed",
+        description: `The due "${dueToRemove.description}" has been successfully removed.`,
+      });
     }
-  }, [dues]);
+  }, [dues, token]);
 
-  const recordStudentPayment = useCallback((dueId: string, studentId: string) => {
-    // This will be replaced with an API call
+  const recordStudentPayment = useCallback(async (dueId: string, studentId: string) => {
+    if (isApiConfigured()) {
+      try {
+        const created = await DuesApi.recordPayment(dueId, token);
+        if (created) {
+          setStudentPayments((prev) => [...prev, created]);
+        }
+        return;
+      } catch (err) {
+        console.error('Failed to record payment via API', err);
+      }
+    }
     setStudentPayments((prevPayments) => {
       if (prevPayments.some(p => p.dueId === dueId && p.studentId === studentId)) {
         return prevPayments;
@@ -115,7 +149,7 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
       };
       return [...prevPayments, newPayment];
     });
-  }, []);
+  }, [token]);
 
   const hasStudentPaid = useCallback((dueId: string, studentId: string): boolean => {
     return studentPayments.some(p => p.dueId === dueId && p.studentId === studentId);
