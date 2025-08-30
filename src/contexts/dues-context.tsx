@@ -99,15 +99,16 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
 			const insertPayload = mapDueToInsert(newDueData);
 			const { data, error } = await supabase
 				.from('dues')
-				.insert(insertPayload)
+				.insert({ ...insertPayload, created_by: user?.id })
 				.select('*')
 				.single();
 			if (error) throw error;
 			setDues((prev) => [...prev, mapDueRowToDue(data as DueRow)]);
 		} catch (err) {
 			console.error('Failed to add due via Supabase', err);
+			toast({ title: 'Unable to add due', description: (err as any)?.message || 'Permission denied or network issue', variant: 'destructive' });
 		}
-	}, []);
+	}, [user?.id]);
 
 	const removeDue = useCallback(async (dueIdToRemove: string) => {
 		const dueToRemove = dues.find(d => d.id === dueIdToRemove);
@@ -118,16 +119,18 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
 				.delete()
 				.eq('id', dueIdToRemove);
 			if (error) throw error;
+			// Update local state only after a successful delete
+			setDues((prevDues) => prevDues.filter(due => due.id !== dueIdToRemove));
+			setStudentPayments((prevPayments) => prevPayments.filter(payment => payment.dueId !== dueIdToRemove));
+			if (dueToRemove) {
+				toast({
+					title: "Due Removed",
+					description: `The due "${dueToRemove.description}" has been successfully removed.`,
+				});
+			}
 		} catch (err) {
 			console.error('Failed to remove due via Supabase', err);
-		}
-		setDues((prevDues) => prevDues.filter(due => due.id !== dueIdToRemove));
-		setStudentPayments((prevPayments) => prevPayments.filter(payment => payment.dueId !== dueIdToRemove));
-		if (dueToRemove) {
-			toast({
-				title: "Due Removed",
-				description: `The due "${dueToRemove.description}" has been successfully removed.`,
-			});
+			toast({ title: 'Unable to remove due', description: (err as any)?.message || 'Admin permission required or network issue', variant: 'destructive' });
 		}
 	}, [dues]);
 
