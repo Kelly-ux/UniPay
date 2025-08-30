@@ -73,8 +73,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         id: authUser.id,
         email: authUser.email || credentials.email,
         name: profile?.name || authUser.email?.split('@')[0] || 'User',
-        role: credentials.role, // role gating comes from RLS; optionally map from profile.is_admin
-        studentId: profile?.student_id || (credentials.role === 'student' ? credentials.studentId : undefined),
+        role: profile?.is_admin ? 'admin' : 'student',
+        studentId: profile?.student_id || credentials.studentId,
       };
 
       setUser(mappedUser);

@@ -14,6 +14,7 @@ import { UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 const SignupSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -49,27 +50,46 @@ export default function SignupPage() {
 
   const selectedRole = form.watch('role');
 
-  const onSubmit = (data: SignupFormValues) => {
+  const onSubmit = async (data: SignupFormValues) => {
     setIsLoading(true);
     setError(null);
-    
-    // Mock signup logic
-    console.log("Mock signup data:", data);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { data: signUp, error: signUpErr } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/login` : undefined,
+        },
+      });
+      if (signUpErr) throw signUpErr;
 
-    setTimeout(() => {
-      try {
-        // Simulate a successful registration
-        toast({
-          title: 'Account Created!',
-          description: 'Your account has been successfully created (mock). Please log in.',
+      const authUser = signUp.user;
+      if (!authUser) throw new Error('Signup succeeded but no user returned');
+
+      // Upsert profile
+      const isAdmin = data.role === 'admin';
+      const { error: profileErr } = await supabase
+        .from('profiles')
+        .upsert({
+          id: authUser.id,
+          name: data.name,
+          student_id: data.role === 'student' ? data.studentId || null : null,
+          is_admin: isAdmin,
         });
-        router.push('/login');
-      } catch (err: any) {
-        setError(err.message || 'An unexpected error occurred.');
-      } finally {
-        setIsLoading(false);
-      }
-    }, 1000);
+      if (profileErr) throw profileErr;
+
+      // If email confirmations are enabled in Supabase, user must confirm first
+      toast({
+        title: 'Account Created',
+        description: 'If email confirmation is enabled, please check your inbox. Otherwise, log in now.',
+      });
+      router.push('/login');
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
