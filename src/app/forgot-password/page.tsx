@@ -35,9 +35,9 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
     try {
       const supabase = createSupabaseBrowserClient();
-      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/reset-password` : undefined,
-      });
+      const redirectBase = typeof window !== 'undefined' ? `${window.location.origin}/reset-password` : undefined;
+      const redirectTo = redirectBase ? `${redirectBase}?email=${encodeURIComponent(data.email)}` : undefined;
+      const { error } = await supabase.auth.resetPasswordForEmail(data.email, { redirectTo });
       if (error) throw error;
       setIsSubmitted(true);
       toast({

@@ -33,25 +33,43 @@ export default function ResetPasswordPage() {
 
   // Ensure we have an auth session from the email link (tokens come in the URL hash)
   useEffect(() => {
-    const ensureSessionFromHash = async () => {
+    const ensureSessionFromUrl = async () => {
       const { data: sessionData } = await supabase.auth.getSession();
       if (sessionData.session) return;
       if (typeof window === 'undefined') return;
+
+      // First, try hash params from Supabase email link
       const hash = window.location.hash || '';
-      if (!hash.startsWith('#')) return;
-      const params = new URLSearchParams(hash.substring(1));
-      const access_token = params.get('access_token');
-      const refresh_token = params.get('refresh_token');
-      const type = params.get('type');
-      if (type === 'recovery' && access_token && refresh_token) {
-        const { error } = await supabase.auth.setSession({ access_token, refresh_token });
-        if (!error) {
-          // Clean the URL hash to avoid exposing tokens
-          window.history.replaceState({}, document.title, window.location.pathname);
+      if (hash.startsWith('#')) {
+        const params = new URLSearchParams(hash.substring(1));
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token');
+        const type = params.get('type');
+        if (type === 'recovery' && access_token && refresh_token) {
+          const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+          if (!error) {
+            window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+            return;
+          }
+        }
+      }
+
+      // Fallback: some setups provide the access token via query params
+      const search = window.location.search || '';
+      if (search.startsWith('?')) {
+        const params = new URLSearchParams(search);
+        const access_token_q = params.get('access_token');
+        const refresh_token_q = params.get('refresh_token');
+        const type_q = params.get('type');
+        if (type_q === 'recovery' && access_token_q && refresh_token_q) {
+          const { error } = await supabase.auth.setSession({ access_token: access_token_q, refresh_token: refresh_token_q });
+          if (!error) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
         }
       }
     };
-    ensureSessionFromHash();
+    ensureSessionFromUrl();
   }, [supabase]);
 
   const form = useForm<ResetPasswordFormValues>({
