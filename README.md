@@ -17,7 +17,7 @@ DuesPay is a web application designed to streamline the management of university
     *   [Environment Variables](#environment-variables)
     *   [Running the Application](#running-the-application)
 *   [Key Features](#key-features)
-*   [Authentication (Mock Implementation)](#authentication-mock-implementation)
+*   [Authentication](#authentication)
 *   [State Management](#state-management)
 *   [Styling](#styling)
 *   [Important Files & Modules](#important-files--modules)
@@ -36,7 +36,7 @@ This project serves as a starter template built with modern web technologies, de
 *   State management using React Context API.
 *   Form handling and validation.
 
-**Note:** The current version utilizes mock data and a mock authentication system for demonstration purposes. A real backend integration is planned for future development.
+**Note:** The application uses Supabase for authentication and data storage. No mock data is used.
 
 ## Tech Stack
 
@@ -71,7 +71,7 @@ A brief overview of the project's directory structure:
 *   `src/components/`: Shared UI components used across the application.
     *   `src/components/ui/`: ShadCN UI components.
 *   `src/contexts/`: React Context providers for global state management (`AuthContext`, `DuesContext`).
-*   `src/lib/`: Utility functions, type definitions, schemas, and mock data.
+*   `src/lib/`: Utility functions, type definitions, Supabase clients, and constants.
 *   `public/`: Static assets (e.g., images).
 
 ## Getting Started
@@ -140,13 +140,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_ANON_KEY
 *   **Role-Based Authentication (Mocked):** Separate experiences for 'student' and 'admin' roles.
 *   **Light/Dark Theme:** The application uses a light theme by default with support for dark mode styling (though a theme switcher is not yet implemented).
 
-## Authentication (Mock Implementation)
+## Authentication
 
 Authentication is currently mocked for demonstration purposes:
 
 *   **Login Page:** `/login` allows users to "log in" by providing any email/password and selecting a role ('student' or 'admin').
-*   **`AuthContext` (`src/contexts/auth-context.tsx`):** Manages the current user's state (mocked user object).
-    *   When students log in with specific email prefixes (e.g., `alice@example.com`), their `name` is mapped to a full name from `src/lib/mock-data.ts` (e.g., "Alice Wonderland") and they are assigned a predictable ID (`mock-student-alice`). This helps in linking payments to specific mock students.
+*   **`AuthContext` (`src/contexts/auth-context.tsx`):** Manages the current user's state from Supabase Auth; role is derived from `profiles.is_admin`.
 *   **Protected Routes:** `AuthGuard` component in `src/components/auth-guard.tsx` protects routes based on authentication status and user role.
 *   **Persistence:** User session is persisted in `localStorage`.
 
@@ -157,7 +156,7 @@ Authentication is currently mocked for demonstration purposes:
     *   Manages the list of `Due` definitions (e.g., tuition fees for a department).
     *   Manages `studentPayments`, an array tracking which student has paid which due.
     *   Provides functions to add/remove due definitions (admin) and record student payments.
-*   **Persistence:** Due definitions and student payments (mock data) are persisted in `localStorage` to simulate a database across sessions.
+*   **Persistence:** Data is stored in Supabase tables (`dues`, `payments`, `profiles`).
 
 ## Styling
 
@@ -171,7 +170,7 @@ Authentication is currently mocked for demonstration purposes:
 *   **`src/app/page.tsx`:** The main Dues Dashboard page for students and admins.
 *   **`src/contexts/auth-context.tsx`:** Manages authentication state.
 *   **`src/contexts/dues-context.tsx`:** Manages dues and payment data.
-*   **`src/lib/mock-data.ts`:** Defines core data structures (like `Due`, `StudentPayment`), initial mock data, and helper functions for mock user data.
+*   **`src/lib/supabase/*`:** Supabase clients and data mappers.
 *   **`src/components/due-card.tsx`:** Displays individual due items and handles payment/admin actions.
 
 ## Future Enhancements (Potential Roadmap)

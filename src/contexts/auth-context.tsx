@@ -7,12 +7,10 @@ import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import type { ProfileRow } from '@/lib/supabase/mappers';
 
-// Update login credentials to include studentId
+// Login requires only email and password; role is derived from profile
 interface LoginCredentials {
   email: string;
   password: string;
-  role: 'student' | 'admin';
-  studentId?: string;
 }
 
 interface AuthContextType {
@@ -74,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email: authUser.email || credentials.email,
         name: profile?.name || authUser.email?.split('@')[0] || 'User',
         role: profile?.is_admin ? 'admin' : 'student',
-        studentId: profile?.student_id || credentials.studentId,
+        studentId: profile?.student_id || undefined,
       };
 
       setUser(mappedUser);

@@ -22,7 +22,7 @@ export function ReceiptModal({ isOpen, onClose, due, studentName, studentId, pay
 
   const formattedAmount = new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(due.amount);
   const displayPaymentDate = paymentDate ? new Date(paymentDate + 'T00:00:00.000Z').toLocaleDateString() : 'N/A';
-  const transactionId = `MOCK-${due.id}-${paymentDate ? new Date(paymentDate + 'T00:00:00.000Z').getTime() : new Date().getTime()}`;
+  const transactionId = `DUE-${due.id}-${paymentDate ? new Date(paymentDate + 'T00:00:00.000Z').getTime() : new Date().getTime()}`;
 
   const handleDownloadPdf = () => {
     const doc = new jsPDF();
