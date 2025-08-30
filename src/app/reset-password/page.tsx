@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useEffect } from 'react';
 
 const ResetPasswordSchema = z.object({
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
@@ -28,6 +29,30 @@ type ResetPasswordFormValues = z.infer<typeof ResetPasswordSchema>;
 export default function ResetPasswordPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const supabase = createSupabaseBrowserClient();
+
+  // Ensure we have an auth session from the email link (tokens come in the URL hash)
+  useEffect(() => {
+    const ensureSessionFromHash = async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData.session) return;
+      if (typeof window === 'undefined') return;
+      const hash = window.location.hash || '';
+      if (!hash.startsWith('#')) return;
+      const params = new URLSearchParams(hash.substring(1));
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+      const type = params.get('type');
+      if (type === 'recovery' && access_token && refresh_token) {
+        const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+        if (!error) {
+          // Clean the URL hash to avoid exposing tokens
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+    };
+    ensureSessionFromHash();
+  }, [supabase]);
 
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(ResetPasswordSchema),
@@ -40,7 +65,10 @@ export default function ResetPasswordPage() {
   const onSubmit = async (data: ResetPasswordFormValues) => {
     setIsLoading(true);
     try {
-      const supabase = createSupabaseBrowserClient();
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        throw new Error('Auth session missing. Please open the reset link from your email.');
+      }
       const { error } = await supabase.auth.updateUser({ password: data.password });
       if (error) throw error;
       toast({ title: 'Password Reset Successful!', description: 'You can now log in with your new password.' });
