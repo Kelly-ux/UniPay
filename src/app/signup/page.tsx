@@ -67,17 +67,19 @@ export default function SignupPage() {
       const authUser = signUp.user;
       if (!authUser) throw new Error('Signup succeeded but no user returned');
 
-      // Upsert profile
-      const isAdmin = data.role === 'admin';
-      const { error: profileErr } = await supabase
-        .from('profiles')
-        .upsert({
-          id: authUser.id,
-          name: data.name,
-          student_id: data.role === 'student' ? data.studentId || null : null,
-          is_admin: isAdmin,
-        });
-      if (profileErr) throw profileErr;
+      // IMPORTANT: Do NOT grant admin from client signup.
+      // Prefer a DB trigger to create the profile row.
+      // If a session exists (email confirmations disabled), update the profile with name/student_id.
+      if (signUp.session) {
+        const { error: profileUpdateErr } = await supabase
+          .from('profiles')
+          .update({
+            name: data.name,
+            student_id: data.role === 'student' ? data.studentId || null : null,
+          })
+          .eq('id', authUser.id);
+        if (profileUpdateErr) throw profileUpdateErr;
+      }
 
       // If email confirmations are enabled in Supabase, user must confirm first
       toast({
