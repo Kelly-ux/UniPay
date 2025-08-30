@@ -61,11 +61,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!session) throw new Error('No session returned');
 
       const authUser = session.user;
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authUser.id)
-        .single<ProfileRow>();
+      let profile: ProfileRow | null = null;
+      {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authUser.id)
+          .maybeSingle<ProfileRow>();
+        if (!error) profile = (data as ProfileRow) || null;
+      }
+      if (!profile) {
+        // Ensure a profile row exists even if no trigger ran
+        const defaultName = authUser.email?.split('@')[0] || 'User';
+        await supabase
+          .from('profiles')
+          .insert({ id: authUser.id, name: defaultName })
+          .select('*')
+          .maybeSingle();
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authUser.id)
+          .maybeSingle<ProfileRow>();
+        profile = (data as ProfileRow) || null;
+      }
 
       const mappedUser: User = {
         id: authUser.id,

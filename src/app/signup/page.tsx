@@ -67,7 +67,9 @@ export default function SignupPage() {
           },
         },
       });
-      if (signUpErr) throw signUpErr;
+      if (signUpErr) {
+        throw new Error(signUpErr.message || 'Signup failed');
+      }
 
       const authUser = signUp.user;
       if (!authUser) throw new Error('Signup succeeded but no user returned');
