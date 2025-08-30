@@ -60,6 +60,10 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
+              <Label>Email</Label>
+              <Input value={user?.email || ''} disabled />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe" />
             </div>

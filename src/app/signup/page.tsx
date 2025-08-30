@@ -76,15 +76,28 @@ export default function SignupPage() {
       // Prefer a DB trigger to create the profile row.
       // If a session exists (email confirmations disabled), update the profile with name/student_id.
       if (signUp.session) {
-        const { error: profileUpdateErr } = await supabase
-          .from('profiles')
-          .update({
-            name: data.name,
-            student_id: data.role === 'student' ? data.studentId || null : null,
-            pending_admin: data.role === 'admin' ? true : false,
-          })
-          .eq('id', authUser.id);
-        if (profileUpdateErr) throw profileUpdateErr;
+        // Try update with pending_admin; if column missing, retry without it
+        const updatePayloadBase: any = {
+          name: data.name,
+          student_id: data.role === 'student' ? data.studentId || null : null,
+        };
+        let profileUpdateErr: any = null;
+        try {
+          const { error } = await supabase
+            .from('profiles')
+            .update({ ...updatePayloadBase, pending_admin: data.role === 'admin' ? true : false })
+            .eq('id', authUser.id);
+          if (error) profileUpdateErr = error;
+        } catch (e: any) {
+          profileUpdateErr = e;
+        }
+        if (profileUpdateErr) {
+          // Retry without pending_admin in case the column isn't added yet
+          await supabase
+            .from('profiles')
+            .update(updatePayloadBase)
+            .eq('id', authUser.id);
+        }
       }
 
       // If email confirmations are enabled in Supabase, user must confirm first
