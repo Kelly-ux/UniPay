@@ -15,6 +15,7 @@ import { ReceiptModal } from './receipt-modal';
 import { PaymentListModal } from './payment-list-modal';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns'; 
+import { useRouter } from 'next/navigation';
 
 interface DueCardProps {
   due: Due;
@@ -29,6 +30,7 @@ const statusStyles: Record<DueStatus, { icon: React.ElementType; badgeVariant: '
 export function DueCard({ due }: DueCardProps) {
   const { user } = useAuth();
   const { recordStudentPayment, hasStudentPaid, getStudentPaymentDate, removeDue } = useDues();
+  const router = useRouter();
   
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const [receiptStudentName, setReceiptStudentName] = useState<string | null>(null);
@@ -74,8 +76,13 @@ export function DueCard({ due }: DueCardProps) {
   const formattedAmount = new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(due.amount);
   
   const handlePayNow = async () => {
-    if (!user || !user.studentId) {
+    if (!user) {
       toast({ title: "Login Required", description: "Please log in to make a payment.", variant: "destructive" });
+      return;
+    }
+    if (!user.studentId) {
+      toast({ title: "Student ID Required", description: "Add your Student ID in your profile before paying.", variant: "destructive" });
+      router.push('/profile');
       return;
     }
     recordStudentPayment(due.id, user.id);

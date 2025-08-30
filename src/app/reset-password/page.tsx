@@ -13,6 +13,7 @@ import { KeyRound, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 const ResetPasswordSchema = z.object({
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
@@ -36,19 +37,19 @@ export default function ResetPasswordPage() {
     },
   });
 
-  const onSubmit = (data: ResetPasswordFormValues) => {
+  const onSubmit = async (data: ResetPasswordFormValues) => {
     setIsLoading(true);
-    console.log("Password reset with new password:", data.password);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: 'Password Reset Successful!',
-        description: 'You can now log in with your new password.',
-      });
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { error } = await supabase.auth.updateUser({ password: data.password });
+      if (error) throw error;
+      toast({ title: 'Password Reset Successful!', description: 'You can now log in with your new password.' });
       router.push('/login');
-    }, 1000);
+    } catch (e: any) {
+      toast({ title: 'Reset Failed', description: e.message || 'Invalid or expired reset link', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

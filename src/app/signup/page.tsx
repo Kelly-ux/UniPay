@@ -60,6 +60,11 @@ export default function SignupPage() {
         password: data.password,
         options: {
           emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/login` : undefined,
+          data: {
+            name: data.name,
+            studentId: data.role === 'student' ? (data.studentId || '') : '',
+            requestedRole: data.role,
+          },
         },
       });
       if (signUpErr) throw signUpErr;
