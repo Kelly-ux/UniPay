@@ -7,6 +7,7 @@ create table if not exists public.profiles (
 	name text,
 	student_id text unique,
 	is_admin boolean default false,
+	pending_admin boolean default false,
 	created_at timestamp with time zone default now()
 );
 

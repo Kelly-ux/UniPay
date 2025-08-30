@@ -76,6 +76,7 @@ export default function SignupPage() {
           .update({
             name: data.name,
             student_id: data.role === 'student' ? data.studentId || null : null,
+            pending_admin: data.role === 'admin' ? true : false,
           })
           .eq('id', authUser.id);
         if (profileUpdateErr) throw profileUpdateErr;
@@ -84,7 +85,9 @@ export default function SignupPage() {
       // If email confirmations are enabled in Supabase, user must confirm first
       toast({
         title: 'Account Created',
-        description: 'If email confirmation is enabled, please check your inbox. Otherwise, log in now.',
+        description: data.role === 'admin'
+          ? 'Please verify your email. Your admin access request is pending approval.'
+          : 'Please verify your email, then log in.',
       });
       router.push('/login');
     } catch (err: any) {
