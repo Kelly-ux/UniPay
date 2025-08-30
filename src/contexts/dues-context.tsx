@@ -94,6 +94,10 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
 
 
 	const addDue = useCallback(async (newDueData: Omit<Due, 'id'>) => {
+		if (user?.role !== 'admin') {
+			toast({ title: 'Admin required', description: 'Only admins can add dues.', variant: 'destructive' });
+			return;
+		}
 		try {
 			const supabase = createSupabaseBrowserClient();
 			const insertPayload = mapDueToInsert(newDueData);
@@ -105,10 +109,12 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
 			if (error) throw error;
 			setDues((prev) => [...prev, mapDueRowToDue(data as DueRow)]);
 		} catch (err) {
-			console.error('Failed to add due via Supabase', err);
-			toast({ title: 'Unable to add due', description: (err as any)?.message || 'Permission denied or network issue', variant: 'destructive' });
+			const e = err as any;
+			console.error('Failed to add due via Supabase', e);
+			const description = e?.message || e?.details || e?.hint || JSON.stringify(e);
+			toast({ title: 'Unable to add due', description, variant: 'destructive' });
 		}
-	}, [user?.id]);
+	}, [user?.id, user?.role]);
 
 	const removeDue = useCallback(async (dueIdToRemove: string) => {
 		const dueToRemove = dues.find(d => d.id === dueIdToRemove);
