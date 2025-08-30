@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 const ResetPasswordSchema = z.object({
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
@@ -30,6 +31,8 @@ export default function ResetPasswordPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createSupabaseBrowserClient();
+  const searchParams = useSearchParams();
+  const code = typeof window !== 'undefined' ? (searchParams.get('code') || undefined) : undefined;
 
   // Ensure we have an auth session from the email link (tokens come in the URL hash)
   useEffect(() => {
@@ -38,7 +41,7 @@ export default function ResetPasswordPage() {
       if (sessionData.session) return;
       if (typeof window === 'undefined') return;
 
-      // First, try hash params from Supabase email link
+      // Case 1: Supabase sends #access_token & #refresh_token
       const hash = window.location.hash || '';
       if (hash.startsWith('#')) {
         const params = new URLSearchParams(hash.substring(1));
@@ -54,23 +57,17 @@ export default function ResetPasswordPage() {
         }
       }
 
-      // Fallback: some setups provide the access token via query params
-      const search = window.location.search || '';
-      if (search.startsWith('?')) {
-        const params = new URLSearchParams(search);
-        const access_token_q = params.get('access_token');
-        const refresh_token_q = params.get('refresh_token');
-        const type_q = params.get('type');
-        if (type_q === 'recovery' && access_token_q && refresh_token_q) {
-          const { error } = await supabase.auth.setSession({ access_token: access_token_q, refresh_token: refresh_token_q });
-          if (!error) {
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
+      // Case 2: Supabase sends ?code=<token> (token hash)
+      if (code) {
+        const { error } = await supabase.auth.verifyOtp({ type: 'recovery', token_hash: code });
+        if (!error) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+          return;
         }
       }
     };
     ensureSessionFromUrl();
-  }, [supabase]);
+  }, [supabase, code]);
 
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(ResetPasswordSchema),
