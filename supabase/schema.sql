@@ -47,6 +47,15 @@ alter table public.payments enable row level security;
 create policy if not exists "profiles_select_own" on public.profiles
 	for select using (auth.uid() = id);
 
+-- profiles: allow admins to read all profiles (needed for payment lists)
+create policy if not exists "profiles_select_admins" on public.profiles
+	for select using (
+		exists (
+			select 1 from public.profiles p
+			where p.id = auth.uid() and coalesce(p.is_admin, false) = true
+		)
+	);
+
 create policy if not exists "profiles_update_own" on public.profiles
 	for update using (auth.uid() = id);
 

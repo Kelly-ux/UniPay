@@ -55,7 +55,7 @@ export function mapPaymentRowToPayment(row: PaymentRow): StudentPayment {
 		? row.payment_date.split('T')[0]
 		: row.payment_date;
 	return {
-		studentId: row.student_id || row.auth_user_id,
+		studentId: row.auth_user_id,
 		dueId: row.due_id,
 		paymentDate: dateOnly,
 	};
