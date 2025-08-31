@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -49,6 +49,32 @@ export default function SignupPage() {
   });
 
   const selectedRole = form.watch('role');
+  const emailValue = form.watch('email');
+  const [emailExists, setEmailExists] = useState<boolean | null>(null);
+  const debounceRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (!emailValue || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailValue)) {
+      setEmailExists(null);
+      return;
+    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/auth/check-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailValue.trim().toLowerCase() })
+        });
+        const json = await res.json();
+        if (res.ok) setEmailExists(!!json.exists);
+        else setEmailExists(null);
+      } catch {
+        setEmailExists(null);
+      }
+    }, 300);
+    return () => clearTimeout(debounceRef.current);
+  }, [emailValue]);
 
   const onSubmit = async (data: SignupFormValues) => {
     setIsLoading(true);
@@ -159,6 +185,9 @@ export default function SignupPage() {
                 {...form.register('email')}
                 className={form.formState.errors.email ? 'border-destructive' : ''}
               />
+              {emailExists === true && (
+                <p className="text-sm text-destructive">This email is already registered. Please log in or use a different email.</p>
+              )}
               {form.formState.errors.email && (
                 <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
               )}
