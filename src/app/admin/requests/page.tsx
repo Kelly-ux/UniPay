@@ -38,12 +38,32 @@ export default function AdminRequestsPage() {
   const handleApprove = async (id: string) => {
     const supabase = createSupabaseBrowserClient();
     await supabase.from('profiles').update({ is_admin: true, pending_admin: false }).eq('id', id);
+    // Email notify the target user (if we can find their email) and log the event
+    const { data: userRow } = await supabase.from('profiles').select('name').eq('id', id).maybeSingle();
+    await fetch('/api/admin/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: [],
+        subject: 'Admin Access Approved',
+        html: `<p>Your admin access request has been approved.</p>`,
+      }),
+    }).catch(() => {});
     setRequests((prev) => prev.filter((r) => r.id !== id));
   };
 
   const handleDeny = async (id: string) => {
     const supabase = createSupabaseBrowserClient();
     await supabase.from('profiles').update({ pending_admin: false }).eq('id', id);
+    await fetch('/api/admin/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: [],
+        subject: 'Admin Access Denied',
+        html: `<p>Your admin access request has been denied.</p>`,
+      }),
+    }).catch(() => {});
     setRequests((prev) => prev.filter((r) => r.id !== id));
   };
 
