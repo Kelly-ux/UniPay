@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/components/ui/table';
@@ -9,7 +9,7 @@ import { useDues } from '@/contexts/dues-context';
 import type { Due } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Users } from 'lucide-react';
-import { getStudentDisplayNameFromId } from '@/lib/student-utils';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 interface PaymentListModalProps {
   isOpen: boolean;
@@ -17,14 +17,47 @@ interface PaymentListModalProps {
   dueDefinition: Due | null;
 }
 
+interface PaymentRowUI {
+  studentAuthId: string;
+  studentName: string;
+  studentId: string;
+  paymentDate: string;
+}
 
 export function PaymentListModal({ isOpen, onClose, dueDefinition }: PaymentListModalProps) {
   const { studentPayments } = useDues();
-  
+  const [rows, setRows] = useState<PaymentRowUI[]>([]);
+
   const paymentsForThisDue = useMemo(() => {
     if (!dueDefinition) return [];
     return studentPayments.filter(p => p.dueId === dueDefinition.id);
   }, [dueDefinition, studentPayments]);
+
+  useEffect(() => {
+    const load = async () => {
+      if (!dueDefinition) return;
+      const supabase = createSupabaseBrowserClient();
+      const authIds = Array.from(new Set(paymentsForThisDue.map(p => p.studentId)));
+      if (authIds.length === 0) { setRows([]); return; }
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, name, student_id')
+        .in('id', authIds);
+      const map = new Map<string, { name: string | null; student_id: string | null }>();
+      (profiles || []).forEach((p: any) => map.set(p.id, { name: p.name, student_id: p.student_id }));
+      const enriched = paymentsForThisDue.map(p => {
+        const prof = map.get(p.studentId);
+        return {
+          studentAuthId: p.studentId,
+          studentName: (prof?.name || p.studentId),
+          studentId: (prof?.student_id || p.studentId),
+          paymentDate: p.paymentDate,
+        } as PaymentRowUI;
+      });
+      setRows(enriched);
+    };
+    load();
+  }, [dueDefinition, paymentsForThisDue]);
 
   if (!dueDefinition) return null;
 
@@ -41,9 +74,9 @@ export function PaymentListModal({ isOpen, onClose, dueDefinition }: PaymentList
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-[300px] mt-4 border rounded-md">
-          {paymentsForThisDue.length > 0 ? (
+          {rows.length > 0 ? (
             <Table>
-              <TableCaption>Total {paymentsForThisDue.length} payment(s) for this due.</TableCaption>
+              <TableCaption>Total {rows.length} payment(s) for this due.</TableCaption>
               <TableHeader>
                 <TableRow>
                   <TableHead>Student Name</TableHead>
@@ -52,11 +85,11 @@ export function PaymentListModal({ isOpen, onClose, dueDefinition }: PaymentList
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paymentsForThisDue.map(payment => (
-                  <TableRow key={payment.studentId}>
-                    <TableCell className="font-medium">{getStudentDisplayNameFromId(payment.studentId)}</TableCell>
-                    <TableCell className="font-mono text-muted-foreground">{payment.studentId}</TableCell>
-                    <TableCell className="text-right">{new Date(payment.paymentDate + 'T00:00:00.000Z').toLocaleDateString()}</TableCell>
+                {rows.map(r => (
+                  <TableRow key={r.studentAuthId}>
+                    <TableCell className="font-medium">{r.studentName}</TableCell>
+                    <TableCell className="font-mono text-muted-foreground">{r.studentId}</TableCell>
+                    <TableCell className="text-right">{new Date(r.paymentDate + 'T00:00:00.000Z').toLocaleDateString()}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

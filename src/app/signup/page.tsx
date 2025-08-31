@@ -68,7 +68,11 @@ export default function SignupPage() {
         },
       });
       if (signUpErr) {
-        throw new Error(signUpErr.message || 'Signup failed');
+        const msg = signUpErr.message || 'Signup failed';
+        if (/email/i.test(msg) && /exist|registered|taken|already/i.test(msg)) {
+          throw new Error('This email is already registered. Please log in or use a different email.');
+        }
+        throw new Error(msg);
       }
 
       const authUser = signUp.user;

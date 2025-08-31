@@ -14,7 +14,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 const ResetPasswordSchema = z.object({
@@ -27,7 +27,7 @@ const ResetPasswordSchema = z.object({
 
 type ResetPasswordFormValues = z.infer<typeof ResetPasswordSchema>;
 
-export default function ResetPasswordPage() {
+function ResetPasswordInner() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createSupabaseBrowserClient();
@@ -156,5 +156,13 @@ export default function ResetPasswordPage() {
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense>
+      <ResetPasswordInner />
+    </Suspense>
   );
 }
