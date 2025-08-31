@@ -59,17 +59,23 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
 	// Fetch dues and payments from Supabase when user is present
 	useEffect(() => {
 		const fetchData = async () => {
+			const supabase = createSupabaseBrowserClient();
+			// Fetch dues
 			try {
-				const supabase = createSupabaseBrowserClient();
-				// Dues: readable by all authenticated users (requires dues_select_all policy)
 				const { data: duesRows, error: duesErr } = await supabase
 					.from('dues')
 					.select('*')
 					.order('due_date', { ascending: true });
 				if (duesErr) throw duesErr;
 				setDues((duesRows || []).map((r: any) => mapDueRowToDue(r as DueRow)));
+			} catch (err: any) {
+				const description = err?.message || err?.details || err?.hint || 'Unknown error (dues)';
+				console.error('Failed to fetch dues from Supabase', err);
+				toast({ title: 'Unable to load dues', description, variant: 'destructive' });
+			}
 
-				// Payments: admins may read all; students should only read their own
+			// Fetch payments
+			try {
 				let paymentQuery = supabase.from('payments').select('*');
 				if (user?.role !== 'admin') {
 					paymentQuery = paymentQuery.eq('auth_user_id', user?.id);
@@ -78,9 +84,9 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
 				if (payErr) throw payErr;
 				setStudentPayments((paymentRows || []).map((r: any) => mapPaymentRowToPayment(r as PaymentRow)));
 			} catch (err: any) {
-				const description = err?.message || err?.details || err?.hint || 'Unknown error';
-				console.error('Failed to fetch dues/payments from Supabase', err);
-				toast({ title: 'Unable to load data', description, variant: 'destructive' });
+				const description = err?.message || err?.details || err?.hint || 'Unknown error (payments)';
+				console.error('Failed to fetch payments from Supabase', err);
+				toast({ title: 'Unable to load payments', description, variant: 'destructive' });
 			}
 		};
 		if (user) fetchData();
