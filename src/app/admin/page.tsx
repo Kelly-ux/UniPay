@@ -4,7 +4,7 @@
 import { AuthGuard } from '@/components/auth-guard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FilePlus, ListChecks } from 'lucide-react';
+import { FilePlus, ListChecks, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 
 function AdminDashboard() {
@@ -41,6 +41,19 @@ function AdminDashboard() {
               </CardHeader>
                <CardContent>
                 <Button className="w-full" variant="outline">Go to Dues Dashboard</Button>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/admin/requests" passHref>
+            <Card className="hover:shadow-primary/20 transition-shadow cursor-pointer h-full flex flex-col hover:border-primary">
+              <CardHeader className="flex-grow">
+                <ShieldCheck className="h-10 w-10 text-primary mb-2" />
+                <CardTitle>Admin Requests</CardTitle>
+                <CardDescription>Approve or deny pending admin access requests.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" variant="outline">Review Requests</Button>
               </CardContent>
             </Card>
           </Link>
