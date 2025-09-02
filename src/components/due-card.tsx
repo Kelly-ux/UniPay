@@ -121,14 +121,16 @@ export function DueCard({ due }: DueCardProps) {
             className="object-cover"
             data-ai-hint="university campus"
           />
-          <div className={cn("absolute top-2 right-2")}> 
-            <div className="flex flex-col items-end gap-1">
-              <Badge variant={badgeVariant || 'default'} className={cn(textColorClass, badgeBgClass, "flex items-center gap-1 font-semibold")}> 
-                <StatusIcon className={cn("h-4 w-4", iconColorClass)} /> 
-                {displayStatus}
-              </Badge>
+          {user?.role !== 'admin' && (
+            <div className={cn("absolute top-2 right-2")}> 
+              <div className="flex flex-col items-end gap-1">
+                <Badge variant={badgeVariant || 'default'} className={cn(textColorClass, badgeBgClass, "flex items-center gap-1 font-semibold")}> 
+                  <StatusIcon className={cn("h-4 w-4", iconColorClass)} /> 
+                  {displayStatus}
+                </Badge>
+              </div>
             </div>
-          </div>
+          )}
         </div>
         <CardHeader className="pt-4 pb-2">
           <CardTitle className="text-lg leading-tight font-semibold">{due.description}</CardTitle>
