@@ -205,3 +205,33 @@ Contributions are welcome! Please follow standard coding practices. Ensure code 
 ---
 
 This README aims to provide a good starting point for developers working on or learning from the DuesPay application.
+
+## Payments (Flutterwave) Setup
+
+Add these environment variables (see `.env.example`):
+
+- FLW_PUBLIC_KEY
+- FLW_SECRET_KEY
+- FLW_WEBHOOK_HASH
+- NEXT_PUBLIC_APP_URL (e.g., https://your-app.vercel.app)
+- BUSINESS_NAME (optional branding)
+- BUSINESS_LOGO_URL (optional branding)
+- ADMIN_RECEIPT_EMAILS (comma-separated)
+- PAYMENT_SURCHARGE_PERCENT (optional)
+- PAYMENT_SURCHARGE_FLAT (optional)
+
+Flutterwave (Test Mode) steps:
+
+1. Create an account and switch to Test mode.
+2. Dashboard → Settings → API: copy Test Public/Secret Keys and set a Webhook Hash.
+3. Redirect URL: `https://YOUR_APP/payments/callback`.
+4. Webhook URL: `https://YOUR_APP/api/payments/webhook`.
+5. Redeploy with environment variables set.
+
+Supabase SQL (standalone, safe):
+
+- Run `supabase/payments.sql` to create `payment_intents` and indexes.
+- Optional strict dedupe on existing payments table:
+```sql
+create unique index if not exists payments_due_user_unique on public.payments (due_id, auth_user_id);
+```

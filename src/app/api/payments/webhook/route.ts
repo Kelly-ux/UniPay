@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifyFlutterwaveTransaction } from '@/lib/flutterwave';
+import { sendEmail } from '@/lib/email/resend';
 
 export async function POST(req: NextRequest) {
   const webhookHash = process.env.FLW_WEBHOOK_HASH;
@@ -84,6 +85,37 @@ export async function POST(req: NextRequest) {
         })
         .eq('tx_ref', txRef);
     }
+
+    // Email receipts (best-effort)
+    try {
+      const { data: profile } = await service
+        .from('profiles')
+        .select('*')
+        .eq('id', authUserId)
+        .maybeSingle();
+      const { data: dueDef } = await service
+        .from('dues')
+        .select('*')
+        .eq('id', dueId)
+        .maybeSingle();
+
+      const subject = `Payment Receipt - ${dueDef?.description || 'Dues'} (${currency} ${paidAmount})`;
+      const html = `
+        <div>
+          <p>Hello ${profile?.name || 'Student'},</p>
+          <p>Your payment was successful.</p>
+          <p><strong>Due:</strong> ${dueDef?.description || ''}</p>
+          <p><strong>School/Dept:</strong> ${dueDef?.school || ''} / ${dueDef?.department || ''}</p>
+          <p><strong>Amount:</strong> ${currency} ${paidAmount}</p>
+          <p><strong>Reference:</strong> ${txRef}</p>
+          <p>Thank you.</p>
+        </div>
+      `;
+      const toStudent = v?.customer?.email;
+      const adminEmails = (process.env.ADMIN_RECEIPT_EMAILS || '').split(',').map(s => s.trim()).filter(Boolean);
+      if (toStudent) await sendEmail(toStudent, subject, html);
+      if (adminEmails.length) await sendEmail(adminEmails, `Admin Copy: ${subject}`, html);
+    } catch {}
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {

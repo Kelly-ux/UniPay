@@ -81,6 +81,11 @@ export async function POST(req: NextRequest) {
         department: due.department,
         description: due.description,
       },
+      customizations: {
+        title: process.env.BUSINESS_NAME,
+        logo: process.env.BUSINESS_LOGO_URL,
+        description: `${due.school} - ${due.department}`,
+      },
     });
 
     // Record intent

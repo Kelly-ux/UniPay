@@ -8,6 +8,7 @@ interface CreateCheckoutParams {
   redirectUrl: string;
   meta?: Record<string, any>;
   paymentOptions?: string; // e.g. 'card,mobilemoneyghana,banktransfer'
+  customizations?: { title?: string; logo?: string; description?: string };
 }
 
 export interface CreateCheckoutResponse {
@@ -27,6 +28,12 @@ export async function createFlutterwaveCheckout(params: CreateCheckoutParams): P
     meta: params.meta || {},
   };
   if (params.paymentOptions) payload.payment_options = params.paymentOptions;
+  const title = process.env.BUSINESS_NAME || params.customizations?.title;
+  const logo = process.env.BUSINESS_LOGO_URL || params.customizations?.logo;
+  const description = params.customizations?.description;
+  if (title || logo || description) {
+    payload.customizations = { title, logo, description };
+  }
 
   const res = await fetch('https://api.flutterwave.com/v3/payments', {
     method: 'POST',
