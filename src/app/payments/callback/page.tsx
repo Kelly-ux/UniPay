@@ -1,11 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-export default function PaymentCallbackPage() {
+function CallbackInner() {
   const params = useSearchParams();
   const router = useRouter();
   const status = params.get('status') || 'pending';
@@ -30,6 +30,14 @@ export default function PaymentCallbackPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function PaymentCallbackPage() {
+  return (
+    <Suspense fallback={<div className="py-8 text-center text-sm text-muted-foreground">Loading payment details...</div>}>
+      <CallbackInner />
+    </Suspense>
   );
 }
 

@@ -54,15 +54,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing due or user mapping' }, { status: 400 });
     }
 
-    // Insert into payments (idempotent)
-    await service
+    // Insert into payments if not exists (manual idempotency to avoid impacting existing schema)
+    const { data: already } = await service
       .from('payments')
-      .upsert({
-        due_id: dueId,
-        auth_user_id: authUserId,
-        student_id: academicStudentId,
-        payment_date: new Date().toISOString().split('T')[0],
-      }, { onConflict: 'due_id,auth_user_id' });
+      .select('id')
+      .eq('due_id', dueId)
+      .eq('auth_user_id', authUserId)
+      .maybeSingle();
+    if (!already) {
+      await service
+        .from('payments')
+        .insert({
+          due_id: dueId,
+          auth_user_id: authUserId,
+          student_id: academicStudentId,
+          payment_date: new Date().toISOString().split('T')[0],
+        });
+    }
 
     // Update intent
     if (intent) {
