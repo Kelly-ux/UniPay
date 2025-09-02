@@ -87,17 +87,27 @@ export function DueCard({ due }: DueCardProps) {
       router.push('/profile');
       return;
     }
-    recordStudentPayment(due.id, user.id);
-    
-    setReceiptStudentName(user.name); 
-    setReceiptStudentId(user.studentId);
-    setReceiptDueDetails(due); 
-    setIsReceiptModalOpen(true);
 
-    toast({
-      title: "Payment Successful!",
-      description: `Payment for "${due.description}" has been processed by ${user.name}.`,
-    });
+    try {
+      const res = await fetch('/api/payments/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dueId: due.id }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast({ title: 'Unable to start payment', description: json?.error || 'Please try again later', variant: 'destructive' });
+        return;
+      }
+      const link = json?.link;
+      if (link) {
+        window.location.href = link;
+      } else {
+        toast({ title: 'Payment link missing', description: 'Please try again later', variant: 'destructive' });
+      }
+    } catch (e: any) {
+      toast({ title: 'Error', description: e?.message || 'Failed to start payment', variant: 'destructive' });
+    }
   };
 
   const handleRemoveDue = () => {
