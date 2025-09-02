@@ -117,6 +117,7 @@ export function DueCard({ due }: DueCardProps) {
             src={due.imageUrl || "https://images.unsplash.com/photo-1613243555988-441166d4d6fd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjcmVkaXQlMjBjYXJkfGVufDB8fHx8MTc1NDU2Nzk2M3ww&ixlib=rb-4.1.0&q=80&w=1080"}
             alt={due.imageAlt || `${due.school} ${due.department}`}
             fill
+            unoptimized
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover"
             data-ai-hint="university campus"

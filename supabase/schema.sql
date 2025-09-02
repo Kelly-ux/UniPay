@@ -1,3 +1,59 @@
+-- Images for dues: columns, storage bucket, and RLS policies (idempotent)
+
+-- 1) Add columns on public.dues
+alter table public.dues
+  add column if not exists image_url text,
+  add column if not exists image_alt text;
+
+-- 2) Create storage bucket for dues images (safe to re-run)
+do $$ begin
+  perform 1 from storage.buckets where id = 'dues-images';
+  if not found then
+    insert into storage.buckets (id, name, public) values ('dues-images', 'dues-images', true);
+  end if;
+end $$;
+
+-- 3) Storage policies for bucket "dues-images"
+-- Allow anyone to read (public bucket)
+do $$ begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage' and tablename = 'objects' and policyname = 'dues_images_read'
+  ) then
+    create policy "dues_images_read" on storage.objects
+      for select using (
+        bucket_id = 'dues-images'
+      );
+  end if;
+end $$;
+
+-- Only authenticated users can upload; require admins if you want stricter control
+do $$ begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage' and tablename = 'objects' and policyname = 'dues_images_insert_auth'
+  ) then
+    create policy "dues_images_insert_auth" on storage.objects
+      for insert with check (
+        bucket_id = 'dues-images' and auth.role() = 'authenticated'
+      );
+  end if;
+end $$;
+
+-- Allow owners to update/delete their own uploads (optional)
+-- Uses metadata.owner = auth.uid() pattern; skip if not using metadata
+-- Uncomment and adapt if needed
+-- do $$ begin
+--   if not exists (
+--     select 1 from pg_policies
+--     where schemaname = 'storage' and tablename = 'objects' and policyname = 'dues_images_update_owner'
+--   ) then
+--     create policy "dues_images_update_owner" on storage.objects
+--       for update using (bucket_id = 'dues-images')
+--       with check (bucket_id = 'dues-images');
+--   end if;
+-- end $$;
+
 -- Enable extensions
 create extension if not exists pgcrypto;
 
