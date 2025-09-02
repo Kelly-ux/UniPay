@@ -73,7 +73,7 @@ export function DueCard({ due }: DueCardProps) {
     return 'Unpaid';
   }, [studentHasPaid, due.dueDate, user?.role]);
 
-  const displayStatus = useMemo(() => (user?.role === 'admin' && currentStatus === 'Unpaid' ? 'Upcoming' : currentStatus), [user?.role, currentStatus]);
+  const displayStatus = useMemo(() => currentStatus, [currentStatus]);
   const { icon: StatusIcon, badgeVariant, textColorClass, iconColorClass, badgeBgClass } = statusStyles[displayStatus];
   const formattedAmount = new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(due.amount);
   
@@ -127,11 +127,6 @@ export function DueCard({ due }: DueCardProps) {
                 <StatusIcon className={cn("h-4 w-4", iconColorClass)} /> 
                 {displayStatus}
               </Badge>
-              {user?.role === 'admin' && (
-                <span className="text-[10px] text-muted-foreground bg-background/80 rounded px-1 py-0.5">
-                  Status reflects due date, not per-student payment.
-                </span>
-              )}
             </div>
           </div>
         </div>
