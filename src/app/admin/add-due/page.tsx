@@ -21,6 +21,7 @@ import { CalendarIcon, FilePlus, Building, SchoolIcon as SchoolLucideIcon } from
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 // Schema for adding a Due Definition
 const AddDueSchema = z.object({
@@ -30,6 +31,7 @@ const AddDueSchema = z.object({
   school: z.string().min(1, 'School is required.'),
   department: z.string().min(1, 'Department is required.'),
   paymentMethodSuggestion: z.string().optional(),
+  imageAlt: z.string().optional(),
 });
 
 type AddDueFormValues = z.infer<typeof AddDueSchema>;
@@ -40,6 +42,8 @@ function AddDueForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState<string>('');
   const [departmentsForSchool, setDepartmentsForSchool] = useState<string[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const form = useForm<AddDueFormValues>({
     resolver: zodResolver(AddDueSchema),
@@ -49,6 +53,7 @@ function AddDueForm() {
       school: '',
       department: '',
       paymentMethodSuggestion: 'Online Portal',
+      imageAlt: '',
     },
   });
 
@@ -68,12 +73,34 @@ function AddDueForm() {
   const onSubmit = async (data: AddDueFormValues) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      // Optional image upload to Supabase Storage
+      let imageUrl: string | undefined;
+      if (imageFile) {
+        try {
+          const supabase = createSupabaseBrowserClient();
+          const fileExt = imageFile.name.split('.').pop() || 'jpg';
+          const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+          // Use a temporary path; we don't have the due id until after insert in some modes, but path uniqueness is fine
+          const path = `dues/${fileName}`;
+          const { error: upErr } = await supabase.storage.from('dues-images').upload(path, imageFile, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: imageFile.type || 'image/jpeg',
+          });
+          if (upErr) throw upErr;
+          const { data: pub } = supabase.storage.from('dues-images').getPublicUrl(path);
+          imageUrl = pub?.publicUrl || undefined;
+        } catch (e) {
+          console.warn('Image upload failed; continuing without image', e);
+          toast({ title: 'Image upload failed', description: 'Due was created without image.', variant: 'destructive' });
+        }
+      }
+
       const dueDefinitionData = {
         ...data,
         dueDate: format(data.dueDate, 'yyyy-MM-dd'), 
+        imageUrl,
+        imageAlt: data.imageAlt || undefined,
       };
       addDue(dueDefinitionData);
 
@@ -193,6 +220,28 @@ function AddDueForm() {
             <Label htmlFor="paymentMethodSuggestion">Payment Method Suggestion (Optional)</Label>
             <Input id="paymentMethodSuggestion" placeholder="e.g., Online Portal, Department Office" {...form.register('paymentMethodSuggestion')} />
             {form.formState.errors.paymentMethodSuggestion && <p className="text-sm text-destructive">{form.formState.errors.paymentMethodSuggestion.message}</p>}
+          </div>
+
+          {/* Image Upload (Optional) */}
+          <div className="space-y-2">
+            <Label htmlFor="dueImage">Due Image (Optional)</Label>
+            <Input id="dueImage" type="file" accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                setImageFile(file);
+                if (file) {
+                  const url = URL.createObjectURL(file);
+                  setImagePreview(url);
+                } else {
+                  setImagePreview(null);
+                }
+              }}
+            />
+            {imagePreview && (
+              <img src={imagePreview} alt="Preview" className="mt-2 h-32 w-full object-cover rounded border" />
+            )}
+            <Label htmlFor="imageAlt">Image Alt Text (Optional)</Label>
+            <Input id="imageAlt" placeholder="Short description for accessibility" {...form.register('imageAlt')} />
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>

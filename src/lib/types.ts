@@ -19,6 +19,8 @@ export interface Due {
   amount: number;
   dueDate: string; // YYYY-MM-DD
   paymentMethodSuggestion?: string;
+  imageUrl?: string;
+  imageAlt?: string;
 }
 
 // Represents a single payment entry for a student and due

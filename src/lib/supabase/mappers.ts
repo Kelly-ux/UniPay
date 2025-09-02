@@ -9,6 +9,8 @@ export interface DueRow {
 	due_date: string; // YYYY-MM-DD
 	payment_method_suggestion?: string | null;
 	created_by?: string | null;
+  image_url?: string | null;
+  image_alt?: string | null;
 }
 
 export interface PaymentRow {
@@ -35,6 +37,8 @@ export function mapDueRowToDue(row: DueRow): Due {
 		amount: row.amount,
 		dueDate: row.due_date,
 		paymentMethodSuggestion: row.payment_method_suggestion || undefined,
+    imageUrl: row.image_url || undefined,
+    imageAlt: row.image_alt || undefined,
 	};
 }
 
@@ -46,6 +50,8 @@ export function mapDueToInsert(due: Omit<Due, 'id'>) {
 		amount: due.amount,
 		due_date: due.dueDate,
 		payment_method_suggestion: due.paymentMethodSuggestion ?? null,
+    image_url: due.imageUrl ?? null,
+    image_alt: due.imageAlt ?? null,
 	};
 }
 
