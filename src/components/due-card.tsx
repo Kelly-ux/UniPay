@@ -21,15 +21,16 @@ interface DueCardProps {
   due: Due;
 }
 
-const statusStyles: Record<DueStatus, { icon: React.ElementType; badgeVariant: 'default' | 'secondary' | 'destructive' | 'outline' | null | undefined, textColorClass: string, iconColorClass: string, badgeBgClass: string }> = {
+const statusStyles: Record<string, { icon: React.ElementType; badgeVariant: 'default' | 'secondary' | 'destructive' | 'outline' | null | undefined, textColorClass: string, iconColorClass: string, badgeBgClass: string }> = {
   Paid: { icon: CheckCircle2, badgeVariant: 'default', textColorClass: 'text-green-700', iconColorClass: 'text-green-600', badgeBgClass: 'bg-green-100 border-green-300' },
   Unpaid: { icon: Info, badgeVariant: 'secondary', textColorClass: 'text-blue-700', iconColorClass: 'text-blue-600', badgeBgClass: 'bg-blue-100 border-blue-300' },
+  Upcoming: { icon: Info, badgeVariant: 'secondary', textColorClass: 'text-blue-700', iconColorClass: 'text-blue-600', badgeBgClass: 'bg-blue-100 border-blue-300' },
   Overdue: { icon: AlertTriangle, badgeVariant: 'destructive', textColorClass: 'text-red-700', iconColorClass: 'text-red-600', badgeBgClass: 'bg-red-100 border-red-300' },
 };
 
 export function DueCard({ due }: DueCardProps) {
   const { user } = useAuth();
-  const { recordStudentPayment, hasStudentPaid, getStudentPaymentDate, removeDue } = useDues();
+  const { recordStudentPayment, hasStudentPaid, getStudentPaymentDate, removeDue, studentPayments } = useDues();
   const router = useRouter();
   
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
@@ -72,7 +73,8 @@ export function DueCard({ due }: DueCardProps) {
     return 'Unpaid';
   }, [studentHasPaid, due.dueDate, user?.role]);
 
-  const { icon: StatusIcon, badgeVariant, textColorClass, iconColorClass, badgeBgClass } = statusStyles[currentStatus];
+  const displayStatus = useMemo(() => (user?.role === 'admin' && currentStatus === 'Unpaid' ? 'Upcoming' : currentStatus), [user?.role, currentStatus]);
+  const { icon: StatusIcon, badgeVariant, textColorClass, iconColorClass, badgeBgClass } = statusStyles[displayStatus];
   const formattedAmount = new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(due.amount);
   
   const handlePayNow = async () => {
@@ -119,11 +121,18 @@ export function DueCard({ due }: DueCardProps) {
             className="object-cover"
             data-ai-hint="university campus"
           />
-          <div className={cn("absolute top-2 right-2")}>
-            <Badge variant={badgeVariant || 'default'} className={cn(textColorClass, badgeBgClass, "flex items-center gap-1 font-semibold")}>
-              <StatusIcon className={cn("h-4 w-4", iconColorClass)} />
-              {currentStatus}
-            </Badge>
+          <div className={cn("absolute top-2 right-2")}> 
+            <div className="flex flex-col items-end gap-1">
+              <Badge variant={badgeVariant || 'default'} className={cn(textColorClass, badgeBgClass, "flex items-center gap-1 font-semibold")}> 
+                <StatusIcon className={cn("h-4 w-4", iconColorClass)} /> 
+                {displayStatus}
+              </Badge>
+              {user?.role === 'admin' && (
+                <span className="text-[10px] text-muted-foreground bg-background/80 rounded px-1 py-0.5">
+                  Status reflects due date, not per-student payment.
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <CardHeader className="pt-4 pb-2">
@@ -143,6 +152,9 @@ export function DueCard({ due }: DueCardProps) {
             <CalendarDays className="mr-1 h-4 w-4" />
             Due: {createUTCDate(due.dueDate).toLocaleDateString('en-US', { timeZone: 'UTC' })}
           </div>
+          {user?.role === 'admin' && (
+            <AdminDueMetrics dueId={due.id} allPayments={studentPayments} />
+          )}
           {user?.role === 'student' && currentStatus === 'Paid' && paymentDateForStudent && (
             <div className="flex items-center text-sm text-green-600 font-medium">
               <CheckCircle2 className="mr-1 h-4 w-4" />
@@ -185,7 +197,7 @@ export function DueCard({ due }: DueCardProps) {
                 className="flex-1 min-w-[110px]"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Remove
+                Archive
               </Button>
             </div>
           )}
@@ -216,5 +228,23 @@ export function DueCard({ due }: DueCardProps) {
          />
       )}
     </>
+  );
+}
+
+function AdminDueMetrics({ dueId, allPayments }: { dueId: string; allPayments: { dueId: string; studentId: string; paymentDate: string; }[] }) {
+  const paymentsForDue = React.useMemo(() => allPayments.filter(p => p.dueId === dueId), [allPayments, dueId]);
+  const count = paymentsForDue.length;
+  const lastPaymentDate = React.useMemo(() => {
+    if (paymentsForDue.length === 0) return null;
+    const max = paymentsForDue.reduce((acc, p) => (p.paymentDate > acc ? p.paymentDate : acc), paymentsForDue[0].paymentDate);
+    return max;
+  }, [paymentsForDue]);
+  return (
+    <div className="mt-2 text-sm text-muted-foreground space-y-1">
+      <div><span className="font-medium text-foreground">{count}</span> paid</div>
+      {lastPaymentDate && (
+        <div>Last payment: {new Date(lastPaymentDate + 'T00:00:00.000Z').toLocaleDateString()}</div>
+      )}
+    </div>
   );
 }
