@@ -40,8 +40,6 @@ function ResetPasswordInner() {
     },
   });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   // Client-side fallback: if no session yet but we have a code param, exchange it
   useEffect(() => {
     let cancelled = false;
