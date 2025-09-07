@@ -14,9 +14,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import { useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 const ResetPasswordSchema = z.object({
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
@@ -32,48 +30,7 @@ function ResetPasswordInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
-<<<<<<< HEAD
-  const supabase = createSupabaseBrowserClient();
-  const searchParams = useSearchParams();
-  const code = typeof window !== 'undefined' ? (searchParams.get('code') || undefined) : undefined;
-
-  // Ensure we have an auth session from the email link (tokens come in the URL hash)
-  useEffect(() => {
-    const ensureSessionFromUrl = async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (sessionData.session) return;
-      if (typeof window === 'undefined') return;
-
-      // Case 1: Supabase sends #access_token & #refresh_token
-      const hash = window.location.hash || '';
-      if (hash.startsWith('#')) {
-        const params = new URLSearchParams(hash.substring(1));
-        const access_token = params.get('access_token');
-        const refresh_token = params.get('refresh_token');
-        const type = params.get('type');
-        if (type === 'recovery' && access_token && refresh_token) {
-          const { error } = await supabase.auth.setSession({ access_token, refresh_token });
-          if (!error) {
-            window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
-            return;
-          }
-        }
-      }
-
-      // Case 2: Supabase sends ?code=<token> (token hash)
-      if (code) {
-        const { error } = await supabase.auth.verifyOtp({ type: 'recovery', token_hash: code });
-        if (!error) {
-          window.history.replaceState({}, document.title, window.location.pathname);
-          return;
-        }
-      }
-    };
-    ensureSessionFromUrl();
-  }, [supabase, code]);
-=======
   const [sessionReady, setSessionReady] = useState(false);
->>>>>>> master
 
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(ResetPasswordSchema),
@@ -84,20 +41,7 @@ function ResetPasswordInner() {
   });
 
 <<<<<<< HEAD
-  const onSubmit = async (data: ResetPasswordFormValues) => {
-    setIsLoading(true);
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData.session) {
-        throw new Error('Auth session missing. Please open the reset link from your email.');
-      }
-      const { error } = await supabase.auth.updateUser({ password: data.password });
-      if (error) throw error;
-      toast({ title: 'Password Reset Successful!', description: 'You can now log in with your new password.' });
-      router.push('/login');
-    } catch (e: any) {
-      toast({ title: 'Reset Failed', description: e.message || 'Invalid or expired reset link', variant: 'destructive' });
-=======
+<<<<<<< HEAD
   // Client-side fallback: if no session yet but we have a code param, exchange it
   useEffect(() => {
     let cancelled = false;
@@ -164,7 +108,6 @@ function ResetPasswordInner() {
       router.push('/');
     } catch (err: any) {
       toast({ title: 'Error', description: err?.message || 'Failed to reset password', variant: 'destructive' });
->>>>>>> master
     } finally {
       setIsLoading(false);
     }
