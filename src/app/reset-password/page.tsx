@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { KeyRound, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -27,7 +27,9 @@ type ResetPasswordFormValues = z.infer<typeof ResetPasswordSchema>;
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
 
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(ResetPasswordSchema),
@@ -37,10 +39,36 @@ export default function ResetPasswordPage() {
     },
   });
 
+  // Client-side fallback: if no session yet but we have a code param, exchange it
+  useEffect(() => {
+    let cancelled = false;
+    const ensureSession = async () => {
+      const supabase = createSupabaseBrowserClient();
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        if (!cancelled) setSessionReady(true);
+        return;
+      }
+      const code = searchParams?.get('code');
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!cancelled) setSessionReady(!error);
+      } else {
+        if (!cancelled) setSessionReady(false);
+      }
+    };
+    ensureSession();
+    return () => { cancelled = true; };
+  }, [searchParams]);
+
   const onSubmit = async (data: ResetPasswordFormValues) => {
     setIsLoading(true);
     try {
       const supabase = createSupabaseBrowserClient();
+      const { data: sess } = await supabase.auth.getSession();
+      if (!sess.session) {
+        throw new Error('Auth session missing, please open the reset link from your mail.');
+      }
       const { error } = await supabase.auth.updateUser({ password: data.password });
       if (error) throw error;
       toast({ title: 'Password Reset Successful!', description: 'You can now use your new password.' });
