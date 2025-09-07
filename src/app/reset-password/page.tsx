@@ -49,12 +49,22 @@ export default function ResetPasswordPage() {
         if (!cancelled) setSessionReady(true);
         return;
       }
-      const code = searchParams?.get('code');
+      // Read from query or hash
+      const code = searchParams?.get('code') || (typeof window !== 'undefined' && window.location.hash ? new URLSearchParams(window.location.hash.slice(1)).get('code') : null);
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (!cancelled) setSessionReady(!error);
       } else {
-        if (!cancelled) setSessionReady(false);
+        // Try token pair
+        const getHashParam = (key: string) => (typeof window !== 'undefined' && window.location.hash ? new URLSearchParams(window.location.hash.slice(1)).get(key) : null);
+        const accessToken = searchParams?.get('access_token') || getHashParam('access_token');
+        const refreshToken = searchParams?.get('refresh_token') || getHashParam('refresh_token');
+        if (accessToken && refreshToken) {
+          const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+          if (!cancelled) setSessionReady(!error);
+        } else {
+          if (!cancelled) setSessionReady(false);
+        }
       }
     };
     ensureSession();
@@ -127,7 +137,7 @@ export default function ResetPasswordPage() {
               )}
             </div>
             
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || !sessionReady}>
               {isLoading ? (
                 <>
                   <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

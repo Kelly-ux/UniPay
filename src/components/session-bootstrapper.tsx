@@ -21,9 +21,18 @@ export function SessionBootstrapper() {
       const { data: current } = await supabase.auth.getSession();
       if (current.session) return;
 
-      const code = searchParams?.get('code');
-      const accessToken = searchParams?.get('access_token');
-      const refreshToken = searchParams?.get('refresh_token');
+      // Read from both query and hash (Supabase may put tokens in the hash)
+      let hashParams: URLSearchParams | null = null;
+      if (typeof window !== 'undefined' && window.location.hash) {
+        const raw = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+        hashParams = new URLSearchParams(raw);
+      }
+
+      const getParam = (key: string) => searchParams?.get(key) || hashParams?.get(key) || null;
+
+      const code = getParam('code');
+      const accessToken = getParam('access_token');
+      const refreshToken = getParam('refresh_token');
 
       let error: any = null;
       if (code) {
@@ -44,6 +53,14 @@ export function SessionBootstrapper() {
       params.delete('refresh_token');
       const nextParam = params.get('next');
       params.delete('next');
+
+      // Also clear hash tokens if present
+      if (typeof window !== 'undefined' && hashParams) {
+        hashParams.delete('code');
+        hashParams.delete('type');
+        hashParams.delete('access_token');
+        hashParams.delete('refresh_token');
+      }
 
       if (cancelled) return;
       const newQuery = params.toString();
