@@ -33,11 +33,18 @@ export function SessionBootstrapper() {
       const code = getParam('code');
       const accessToken = getParam('access_token');
       const refreshToken = getParam('refresh_token');
+      const type = getParam('type');
+      const email = getParam('email');
 
       let error: any = null;
       if (code) {
-        const res = await supabase.auth.exchangeCodeForSession(code);
-        error = res.error;
+        if (type === 'recovery') {
+          const res = await supabase.auth.verifyOtp({ type: 'recovery', token_hash: code, email: email || undefined });
+          error = res.error;
+        } else {
+          const res = await supabase.auth.exchangeCodeForSession(code);
+          error = res.error;
+        }
       } else if (accessToken && refreshToken) {
         const res = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
         error = res.error;
@@ -67,8 +74,8 @@ export function SessionBootstrapper() {
       const baseUrl = nextParam || pathname;
       router.replace(newQuery ? `${baseUrl}?${newQuery}` : baseUrl);
 
-      const type = searchParams?.get('type');
-      if (!error && type === 'recovery' && !nextParam) {
+      const recoveryType = searchParams?.get('type') || hashParams?.get('type');
+      if (!error && recoveryType === 'recovery' && !nextParam) {
         router.replace('/reset-password');
       }
     };
