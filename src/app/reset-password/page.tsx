@@ -65,10 +65,18 @@ export default function ResetPasswordPage() {
     setIsLoading(true);
     try {
       const supabase = createSupabaseBrowserClient();
-      const { data: sess } = await supabase.auth.getSession();
+      // Final fallback: if no session but tokens present, set them
+      let { data: sess } = await supabase.auth.getSession();
       if (!sess.session) {
-        throw new Error('Auth session missing, please open the reset link from your mail.');
+        const accessToken = searchParams?.get('access_token');
+        const refreshToken = searchParams?.get('refresh_token');
+        if (accessToken && refreshToken) {
+          await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+          const res = await supabase.auth.getSession();
+          sess = res.data;
+        }
       }
+      if (!sess.session) throw new Error('Auth session missing, please open the reset link from your mail.');
       const { error } = await supabase.auth.updateUser({ password: data.password });
       if (error) throw error;
       toast({ title: 'Password Reset Successful!', description: 'You can now use your new password.' });

@@ -17,15 +17,26 @@ export function SessionBootstrapper() {
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
-      const code = searchParams?.get('code');
-      if (!code) return;
-
       const supabase = createSupabaseBrowserClient();
       const { data: current } = await supabase.auth.getSession();
-      if (current.session) return; // already authenticated
+      if (current.session) return;
 
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
-      // Strip auth params from URL regardless of success to avoid repeated attempts
+      const code = searchParams?.get('code');
+      const accessToken = searchParams?.get('access_token');
+      const refreshToken = searchParams?.get('refresh_token');
+
+      let error: any = null;
+      if (code) {
+        const res = await supabase.auth.exchangeCodeForSession(code);
+        error = res.error;
+      } else if (accessToken && refreshToken) {
+        const res = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        error = res.error;
+      } else {
+        return;
+      }
+
+      // Clean URL
       const params = new URLSearchParams(searchParams?.toString() || '');
       params.delete('code');
       params.delete('type');
@@ -39,7 +50,6 @@ export function SessionBootstrapper() {
       const baseUrl = nextParam || pathname;
       router.replace(newQuery ? `${baseUrl}?${newQuery}` : baseUrl);
 
-      // If this was a recovery link and no explicit next, prefer reset page
       const type = searchParams?.get('type');
       if (!error && type === 'recovery' && !nextParam) {
         router.replace('/reset-password');
