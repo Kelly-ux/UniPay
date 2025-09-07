@@ -38,7 +38,7 @@ export function Header() {
   const pathname = usePathname();
   const { user, logout, isLoading } = useAuth();
 
-  let navItems = user ? [...baseNavItems] : [];
+  let navItems = [...baseNavItems];
   if (user?.role === 'student') {
     navItems = [...navItems, ...studentNavItems];
   } else if (user?.role === 'admin') {

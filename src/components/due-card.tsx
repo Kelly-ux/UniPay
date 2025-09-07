@@ -78,20 +78,17 @@ export function DueCard({ due }: DueCardProps) {
       toast({ title: "Login Required", description: "Please log in to make a payment.", variant: "destructive" });
       return;
     }
-    try {
-      const res = await fetch('/api/payments/initiate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dueId: due.id }),
-      });
-      if (!res.ok) throw new Error('Failed to initiate payment');
-      const data = await res.json();
-      const link = data?.link as string | undefined;
-      if (!link) throw new Error('No payment link returned');
-      window.location.href = link;
-    } catch (err: any) {
-      toast({ title: 'Payment Error', description: err?.message || 'Could not start payment', variant: 'destructive' });
-    }
+    recordStudentPayment(due.id, user.id);
+    
+    setReceiptStudentName(user.name); 
+    setReceiptStudentId(user.studentId);
+    setReceiptDueDetails(due); 
+    setIsReceiptModalOpen(true);
+
+    toast({
+      title: "Payment Successful!",
+      description: `Payment for "${due.description}" has been processed by ${user.name}.`,
+    });
   };
 
   const handleRemoveDue = () => {

@@ -12,7 +12,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { MailQuestion, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from '@/hooks/use-toast';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 const ForgotPasswordSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -31,23 +30,19 @@ export default function ForgotPasswordPage() {
     },
   });
 
-  const onSubmit = async (data: ForgotPasswordFormValues) => {
+  const onSubmit = (data: ForgotPasswordFormValues) => {
     setIsLoading(true);
-    try {
-      const supabase = createSupabaseBrowserClient();
-      const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/callback?next=/reset-password`;
-      const { error } = await supabase.auth.resetPasswordForEmail(data.email, { redirectTo });
-      if (error) throw error;
+    console.log("Password reset requested for:", data.email);
+
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
       setIsSubmitted(true);
       toast({
         title: 'Check your inbox!',
-        description: `A password reset link has been sent to ${data.email}.`,
+        description: `A password reset link has been sent to ${data.email} (mock).`,
       });
-    } catch (err: any) {
-      toast({ title: 'Error', description: err?.message || 'Failed to send reset email', variant: 'destructive' });
-    } finally {
-      setIsLoading(false);
-    }
+    }, 1000);
   };
   
   if (isSubmitted) {
@@ -64,7 +59,14 @@ export default function ForgotPasswordPage() {
                 <p className="text-muted-foreground">
                     If an account with that email exists, we have sent a password reset link. Please check your inbox and spam folder.
                 </p>
-                <div className="mt-6" />
+                <div className="mt-6">
+                    {/* In a real app, this link would not exist. It's here for demo purposes. */}
+                    <Link href="/reset-password">
+                        <Button variant="secondary">
+                            Proceed to Reset (Demo)
+                        </Button>
+                    </Link>
+                </div>
             </CardContent>
              <CardFooter className="text-center text-sm">
                 <Link href="/login" className="font-medium text-primary hover:underline flex items-center gap-2 mx-auto">

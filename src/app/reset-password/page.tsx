@@ -12,7 +12,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { KeyRound, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 const ResetPasswordSchema = z.object({
@@ -37,19 +36,19 @@ export default function ResetPasswordPage() {
     },
   });
 
-  const onSubmit = async (data: ResetPasswordFormValues) => {
+  const onSubmit = (data: ResetPasswordFormValues) => {
     setIsLoading(true);
-    try {
-      const supabase = createSupabaseBrowserClient();
-      const { error } = await supabase.auth.updateUser({ password: data.password });
-      if (error) throw error;
-      toast({ title: 'Password Reset Successful!', description: 'You can now use your new password.' });
-      router.push('/');
-    } catch (err: any) {
-      toast({ title: 'Error', description: err?.message || 'Failed to reset password', variant: 'destructive' });
-    } finally {
+    console.log("Password reset with new password:", data.password);
+
+    // Simulate API call
+    setTimeout(() => {
       setIsLoading(false);
-    }
+      toast({
+        title: 'Password Reset Successful!',
+        description: 'You can now log in with your new password.',
+      });
+      router.push('/login');
+    }, 1000);
   };
 
   return (
