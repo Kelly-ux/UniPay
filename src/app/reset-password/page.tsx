@@ -51,8 +51,20 @@ export default function ResetPasswordPage() {
       }
       // Read from query or hash
       const code = searchParams?.get('code') || (typeof window !== 'undefined' && window.location.hash ? new URLSearchParams(window.location.hash.slice(1)).get('code') : null);
+      const email = searchParams?.get('email') || (typeof window !== 'undefined' && window.location.hash ? new URLSearchParams(window.location.hash.slice(1)).get('email') : null);
       if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        let error: any = null;
+        if (email) {
+          const v = await supabase.auth.verifyOtp({ type: 'recovery', token_hash: code, email });
+          error = v.error;
+          if (error) {
+            const ex = await supabase.auth.exchangeCodeForSession(code);
+            error = ex.error;
+          }
+        } else {
+          const ex = await supabase.auth.exchangeCodeForSession(code);
+          error = ex.error;
+        }
         if (!cancelled) setSessionReady(!error);
       } else {
         // Try token pair

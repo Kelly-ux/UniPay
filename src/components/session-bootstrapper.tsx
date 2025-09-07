@@ -38,12 +38,24 @@ export function SessionBootstrapper() {
 
       let error: any = null;
       if (code) {
-        if (type === 'recovery') {
-          const res = await supabase.auth.verifyOtp({ type: 'recovery', token_hash: code, email: email || undefined });
-          error = res.error;
+        // Prefer recovery verification if we have an email (type may be missing in some templates)
+        if (email) {
+          const v = await supabase.auth.verifyOtp({ type: 'recovery', token_hash: code, email });
+          error = v.error;
+          if (error) {
+            const ex = await supabase.auth.exchangeCodeForSession(code);
+            error = ex.error;
+          }
+        } else if (type === 'recovery') {
+          const v = await supabase.auth.verifyOtp({ type: 'recovery', token_hash: code, email: undefined });
+          error = v.error;
+          if (error) {
+            const ex = await supabase.auth.exchangeCodeForSession(code);
+            error = ex.error;
+          }
         } else {
-          const res = await supabase.auth.exchangeCodeForSession(code);
-          error = res.error;
+          const ex = await supabase.auth.exchangeCodeForSession(code);
+          error = ex.error;
         }
       } else if (accessToken && refreshToken) {
         const res = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
