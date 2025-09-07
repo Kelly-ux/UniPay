@@ -9,6 +9,7 @@ import { Header } from '@/components/header';
 import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/contexts/auth-context';
 import { DuesProvider } from '@/contexts/dues-context';
+import { SessionBootstrapper } from '@/components/session-bootstrapper';
 
 export const metadata: Metadata = {
   title: 'DuesPay - University Payment Management',
@@ -26,6 +27,7 @@ export default function RootLayout({
       <body className={cn(GeistSans.className, "antialiased bg-background text-foreground min-h-screen flex flex-col")}>
         <AuthProvider>
           <DuesProvider>
+            <SessionBootstrapper />
             <Header />
             <main className="flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8">
               {children}
