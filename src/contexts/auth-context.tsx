@@ -11,6 +11,11 @@ import type { ProfileRow } from '@/lib/supabase/mappers';
 interface LoginCredentials {
   email: string;
   password: string;
+<<<<<<< HEAD
+=======
+  role: 'student' | 'admin';
+  studentId?: string;
+>>>>>>> master
 }
 
 interface AuthContextType {
@@ -61,6 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!session) throw new Error('No session returned');
 
       const authUser = session.user;
+<<<<<<< HEAD
       let profile: ProfileRow | null = null;
       {
         const { data, error } = await supabase
@@ -85,13 +91,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .maybeSingle<ProfileRow>();
         profile = (data as ProfileRow) || null;
       }
+=======
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single<ProfileRow>();
+>>>>>>> master
 
       const mappedUser: User = {
         id: authUser.id,
         email: authUser.email || credentials.email,
         name: profile?.name || authUser.email?.split('@')[0] || 'User',
+<<<<<<< HEAD
         role: profile?.is_admin ? 'admin' : 'student',
         studentId: profile?.student_id || undefined,
+=======
+        role: credentials.role, // role gating comes from RLS; optionally map from profile.is_admin
+        studentId: profile?.student_id || (credentials.role === 'student' ? credentials.studentId : undefined),
+>>>>>>> master
       };
 
       setUser(mappedUser);

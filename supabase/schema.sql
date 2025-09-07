@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 -- Images for dues: columns, storage bucket, and RLS policies (idempotent)
 
 -- 1) Add columns on public.dues
@@ -54,6 +55,8 @@ end $$;
 --   end if;
 -- end $$;
 
+=======
+>>>>>>> master
 -- Enable extensions
 create extension if not exists pgcrypto;
 
@@ -63,7 +66,10 @@ create table if not exists public.profiles (
 	name text,
 	student_id text unique,
 	is_admin boolean default false,
+<<<<<<< HEAD
 	pending_admin boolean default false,
+=======
+>>>>>>> master
 	created_at timestamp with time zone default now()
 );
 
@@ -103,6 +109,7 @@ alter table public.payments enable row level security;
 create policy if not exists "profiles_select_own" on public.profiles
 	for select using (auth.uid() = id);
 
+<<<<<<< HEAD
 -- profiles: allow admins to read all profiles (needed for payment lists)
 create policy if not exists "profiles_select_admins" on public.profiles
 	for select using (
@@ -112,6 +119,8 @@ create policy if not exists "profiles_select_admins" on public.profiles
 		)
 	);
 
+=======
+>>>>>>> master
 create policy if not exists "profiles_update_own" on public.profiles
 	for update using (auth.uid() = id);
 

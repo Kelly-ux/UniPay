@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const baseNavItems = [
   { href: '/', label: 'Dues Dashboard', icon: LayoutDashboard },
@@ -81,6 +82,7 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-4">
+        <ThemeToggle />
         {isLoading ? (
            <div className="h-8 w-20 animate-pulse rounded-md bg-muted"></div>
         ) : user ? (

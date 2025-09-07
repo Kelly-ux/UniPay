@@ -35,8 +35,12 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
     try {
       const supabase = createSupabaseBrowserClient();
+<<<<<<< HEAD
       const redirectBase = typeof window !== 'undefined' ? `${window.location.origin}/reset-password` : undefined;
       const redirectTo = redirectBase ? `${redirectBase}?email=${encodeURIComponent(data.email)}` : undefined;
+=======
+      const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password`;
+>>>>>>> master
       const { error } = await supabase.auth.resetPasswordForEmail(data.email, { redirectTo });
       if (error) throw error;
       setIsSubmitted(true);
@@ -44,8 +48,13 @@ export default function ForgotPasswordPage() {
         title: 'Check your inbox!',
         description: `A password reset link has been sent to ${data.email}.`,
       });
+<<<<<<< HEAD
     } catch (e: any) {
       toast({ title: 'Error', description: e.message || 'Failed to send reset link', variant: 'destructive' });
+=======
+    } catch (err: any) {
+      toast({ title: 'Error', description: err?.message || 'Failed to send reset email', variant: 'destructive' });
+>>>>>>> master
     } finally {
       setIsLoading(false);
     }
@@ -65,7 +74,11 @@ export default function ForgotPasswordPage() {
                 <p className="text-muted-foreground">
                     If an account with that email exists, we have sent a password reset link. Please check your inbox and spam folder.
                 </p>
+<<<<<<< HEAD
 
+=======
+                <div className="mt-6" />
+>>>>>>> master
             </CardContent>
              <CardFooter className="text-center text-sm">
                 <Link href="/login" className="font-medium text-primary hover:underline flex items-center gap-2 mx-auto">

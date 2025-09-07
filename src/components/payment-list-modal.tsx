@@ -9,8 +9,12 @@ import { useDues } from '@/contexts/dues-context';
 import type { Due } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Users } from 'lucide-react';
+<<<<<<< HEAD
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import * as XLSX from 'xlsx';
+=======
+import { getStudentDisplayNameFromId } from '@/lib/student-utils';
+>>>>>>> master
 
 interface PaymentListModalProps {
   isOpen: boolean;

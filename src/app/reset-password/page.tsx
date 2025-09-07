@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,7 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { KeyRound, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useEffect, Suspense } from 'react';
@@ -29,7 +30,9 @@ type ResetPasswordFormValues = z.infer<typeof ResetPasswordSchema>;
 
 function ResetPasswordInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+<<<<<<< HEAD
   const supabase = createSupabaseBrowserClient();
   const searchParams = useSearchParams();
   const code = typeof window !== 'undefined' ? (searchParams.get('code') || undefined) : undefined;
@@ -68,6 +71,9 @@ function ResetPasswordInner() {
     };
     ensureSessionFromUrl();
   }, [supabase, code]);
+=======
+  const [sessionReady, setSessionReady] = useState(false);
+>>>>>>> master
 
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(ResetPasswordSchema),
@@ -77,6 +83,7 @@ function ResetPasswordInner() {
     },
   });
 
+<<<<<<< HEAD
   const onSubmit = async (data: ResetPasswordFormValues) => {
     setIsLoading(true);
     try {
@@ -90,6 +97,74 @@ function ResetPasswordInner() {
       router.push('/login');
     } catch (e: any) {
       toast({ title: 'Reset Failed', description: e.message || 'Invalid or expired reset link', variant: 'destructive' });
+=======
+  // Client-side fallback: if no session yet but we have a code param, exchange it
+  useEffect(() => {
+    let cancelled = false;
+    const ensureSession = async () => {
+      const supabase = createSupabaseBrowserClient();
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        if (!cancelled) setSessionReady(true);
+        return;
+      }
+      // Read from query or hash
+      const code = searchParams?.get('code') || (typeof window !== 'undefined' && window.location.hash ? new URLSearchParams(window.location.hash.slice(1)).get('code') : null);
+      const email = searchParams?.get('email') || (typeof window !== 'undefined' && window.location.hash ? new URLSearchParams(window.location.hash.slice(1)).get('email') : null);
+      if (code) {
+        let error: any = null;
+        if (email) {
+          const v = await supabase.auth.verifyOtp({ type: 'recovery', token_hash: code, email });
+          error = v.error;
+          if (error) {
+            const ex = await supabase.auth.exchangeCodeForSession(code);
+            error = ex.error;
+          }
+        } else {
+          const ex = await supabase.auth.exchangeCodeForSession(code);
+          error = ex.error;
+        }
+        if (!cancelled) setSessionReady(!error);
+      } else {
+        // Try token pair
+        const getHashParam = (key: string) => (typeof window !== 'undefined' && window.location.hash ? new URLSearchParams(window.location.hash.slice(1)).get(key) : null);
+        const accessToken = searchParams?.get('access_token') || getHashParam('access_token');
+        const refreshToken = searchParams?.get('refresh_token') || getHashParam('refresh_token');
+        if (accessToken && refreshToken) {
+          const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+          if (!cancelled) setSessionReady(!error);
+        } else {
+          if (!cancelled) setSessionReady(false);
+        }
+      }
+    };
+    ensureSession();
+    return () => { cancelled = true; };
+  }, [searchParams]);
+
+  const onSubmit = async (data: ResetPasswordFormValues) => {
+    setIsLoading(true);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      // Final fallback: if no session but tokens present, set them
+      let { data: sess } = await supabase.auth.getSession();
+      if (!sess.session) {
+        const accessToken = searchParams?.get('access_token');
+        const refreshToken = searchParams?.get('refresh_token');
+        if (accessToken && refreshToken) {
+          await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+          const res = await supabase.auth.getSession();
+          sess = res.data;
+        }
+      }
+      if (!sess.session) throw new Error('Auth session missing, please open the reset link from your mail.');
+      const { error } = await supabase.auth.updateUser({ password: data.password });
+      if (error) throw error;
+      toast({ title: 'Password Reset Successful!', description: 'You can now use your new password.' });
+      router.push('/');
+    } catch (err: any) {
+      toast({ title: 'Error', description: err?.message || 'Failed to reset password', variant: 'destructive' });
+>>>>>>> master
     } finally {
       setIsLoading(false);
     }
@@ -134,7 +209,7 @@ function ResetPasswordInner() {
               )}
             </div>
             
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || !sessionReady}>
               {isLoading ? (
                 <>
                   <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

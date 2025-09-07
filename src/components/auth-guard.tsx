@@ -18,6 +18,9 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const pathname = usePathname();
 
   useEffect(() => {
+    // If a Supabase email link just landed here with code, allow SessionBootstrapper to run first
+    const hasCode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('code');
+    if (hasCode) return;
     if (!isLoading && !user) {
       router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
     } else if (!isLoading && user && allowedRoles && !allowedRoles.includes(user.role)) {
@@ -25,7 +28,8 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     }
   }, [user, isLoading, router, pathname, allowedRoles]);
 
-  if (isLoading || (!user && pathname !== '/login' && pathname !== '/signup')) { // Allow signup page if it exists
+  const hasCode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('code');
+  if (isLoading || hasCode || (!user && pathname !== '/login' && pathname !== '/signup')) { // Allow signup page if it exists
     return (
       <div className="space-y-8 animate-pulse">
         <div className="flex justify-between items-center">

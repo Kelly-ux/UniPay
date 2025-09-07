@@ -29,3 +29,10 @@ export interface StudentPayment {
   dueId: string;     // Due definition ID
   paymentDate: string; // YYYY-MM-DD
 }
+
+// Represents a single payment entry for a student and due
+export interface StudentPayment {
+  studentId: string; // User ID
+  dueId: string;     // Due definition ID
+  paymentDate: string; // YYYY-MM-DD
+}

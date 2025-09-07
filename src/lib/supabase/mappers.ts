@@ -9,8 +9,11 @@ export interface DueRow {
 	due_date: string; // YYYY-MM-DD
 	payment_method_suggestion?: string | null;
 	created_by?: string | null;
+<<<<<<< HEAD
   image_url?: string | null;
   image_alt?: string | null;
+=======
+>>>>>>> master
 }
 
 export interface PaymentRow {
@@ -37,8 +40,11 @@ export function mapDueRowToDue(row: DueRow): Due {
 		amount: row.amount,
 		dueDate: row.due_date,
 		paymentMethodSuggestion: row.payment_method_suggestion || undefined,
+<<<<<<< HEAD
     imageUrl: row.image_url || undefined,
     imageAlt: row.image_alt || undefined,
+=======
+>>>>>>> master
 	};
 }
 
@@ -50,8 +56,11 @@ export function mapDueToInsert(due: Omit<Due, 'id'>) {
 		amount: due.amount,
 		due_date: due.dueDate,
 		payment_method_suggestion: due.paymentMethodSuggestion ?? null,
+<<<<<<< HEAD
     image_url: due.imageUrl ?? null,
     image_alt: due.imageAlt ?? null,
+=======
+>>>>>>> master
 	};
 }
 
@@ -61,7 +70,11 @@ export function mapPaymentRowToPayment(row: PaymentRow): StudentPayment {
 		? row.payment_date.split('T')[0]
 		: row.payment_date;
 	return {
+<<<<<<< HEAD
 		studentId: row.auth_user_id,
+=======
+		studentId: row.student_id || row.auth_user_id,
+>>>>>>> master
 		dueId: row.due_id,
 		paymentDate: dateOnly,
 	};

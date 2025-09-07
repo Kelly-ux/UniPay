@@ -59,15 +59,21 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
 	// Fetch dues and payments from Supabase when user is present
 	useEffect(() => {
 		const fetchData = async () => {
+<<<<<<< HEAD
 			const supabase = createSupabaseBrowserClient();
 			// Fetch dues
 			try {
+=======
+			try {
+				const supabase = createSupabaseBrowserClient();
+>>>>>>> master
 				const { data: duesRows, error: duesErr } = await supabase
 					.from('dues')
 					.select('*')
 					.order('due_date', { ascending: true });
 				if (duesErr) throw duesErr;
 				setDues((duesRows || []).map((r: any) => mapDueRowToDue(r as DueRow)));
+<<<<<<< HEAD
 			} catch (err: any) {
 				const description = err?.message || err?.details || err?.hint || 'Unknown error (dues)';
 				console.error('Failed to fetch dues from Supabase', err);
@@ -91,6 +97,20 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
 		};
 		if (user) fetchData();
 	}, [user?.id, user?.role]);
+=======
+
+				const { data: paymentRows, error: payErr } = await supabase
+					.from('payments')
+					.select('*');
+				if (payErr) throw payErr;
+				setStudentPayments((paymentRows || []).map((r: any) => mapPaymentRowToPayment(r as PaymentRow)));
+			} catch (err) {
+				console.error('Failed to fetch dues/payments from Supabase', err);
+			}
+		};
+		if (user) fetchData();
+	}, [user?.id]);
+>>>>>>> master
 
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
@@ -106,27 +126,40 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
 
 
 	const addDue = useCallback(async (newDueData: Omit<Due, 'id'>) => {
+<<<<<<< HEAD
 		if (user?.role !== 'admin') {
 			toast({ title: 'Admin required', description: 'Only admins can add dues.', variant: 'destructive' });
 			return;
 		}
+=======
+>>>>>>> master
 		try {
 			const supabase = createSupabaseBrowserClient();
 			const insertPayload = mapDueToInsert(newDueData);
 			const { data, error } = await supabase
 				.from('dues')
+<<<<<<< HEAD
 				.insert({ ...insertPayload, created_by: user?.id })
+=======
+				.insert(insertPayload)
+>>>>>>> master
 				.select('*')
 				.single();
 			if (error) throw error;
 			setDues((prev) => [...prev, mapDueRowToDue(data as DueRow)]);
 		} catch (err) {
+<<<<<<< HEAD
 			const e = err as any;
 			console.error('Failed to add due via Supabase', e);
 			const description = e?.message || e?.details || e?.hint || JSON.stringify(e);
 			toast({ title: 'Unable to add due', description, variant: 'destructive' });
 		}
 	}, [user?.id, user?.role]);
+=======
+			console.error('Failed to add due via Supabase', err);
+		}
+	}, []);
+>>>>>>> master
 
 	const removeDue = useCallback(async (dueIdToRemove: string) => {
 		const dueToRemove = dues.find(d => d.id === dueIdToRemove);
@@ -137,6 +170,7 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
 				.delete()
 				.eq('id', dueIdToRemove);
 			if (error) throw error;
+<<<<<<< HEAD
 			// Update local state only after a successful delete
 			setDues((prevDues) => prevDues.filter(due => due.id !== dueIdToRemove));
 			setStudentPayments((prevPayments) => prevPayments.filter(payment => payment.dueId !== dueIdToRemove));
@@ -149,6 +183,18 @@ export const DuesProvider = ({ children }: { children: ReactNode }) => {
 		} catch (err) {
 			console.error('Failed to remove due via Supabase', err);
 			toast({ title: 'Unable to remove due', description: (err as any)?.message || 'Admin permission required or network issue', variant: 'destructive' });
+=======
+		} catch (err) {
+			console.error('Failed to remove due via Supabase', err);
+		}
+		setDues((prevDues) => prevDues.filter(due => due.id !== dueIdToRemove));
+		setStudentPayments((prevPayments) => prevPayments.filter(payment => payment.dueId !== dueIdToRemove));
+		if (dueToRemove) {
+			toast({
+				title: "Due Removed",
+				description: `The due "${dueToRemove.description}" has been successfully removed.`,
+			});
+>>>>>>> master
 		}
 	}, [dues]);
 

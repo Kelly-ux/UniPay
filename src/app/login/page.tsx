@@ -18,6 +18,17 @@ import { Skeleton } from '@/components/ui/skeleton';
 const LoginSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(1, { message: 'Password is required.' }),
+<<<<<<< HEAD
+=======
+  role: z.enum(['student', 'admin'], { required_error: 'Please select a role.' }),
+  studentId: z.string().optional(), // Student ID is now part of the login form
+}).refine(data => {
+    // Student ID is required only if the role is 'student'
+    return data.role !== 'student' || (data.role === 'student' && data.studentId && data.studentId.trim().length > 0);
+}, {
+    message: "Student ID is required for the student role.",
+    path: ["studentId"],
+>>>>>>> master
 });
 
 
@@ -43,7 +54,11 @@ function LoginForm() {
     setError(null);
     try {
       Promise.resolve(
+<<<<<<< HEAD
         login({ email: data.email, password: data.password })
+=======
+        login({ email: data.email, password: data.password, role: data.role, studentId: data.studentId })
+>>>>>>> master
       ).then(() => {
         const redirectPath = searchParams.get('redirect');
         router.push(redirectPath || '/');
