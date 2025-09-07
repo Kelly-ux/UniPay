@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
     try {
       const supabase = createSupabaseBrowserClient();
-      const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/callback?next=/reset-password`;
+      const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password`;
       const { error } = await supabase.auth.resetPasswordForEmail(data.email, { redirectTo });
       if (error) throw error;
       setIsSubmitted(true);
