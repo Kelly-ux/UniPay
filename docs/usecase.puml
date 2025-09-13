@@ -1,0 +1,72 @@
+@startuml
+title DuesPay Use Case Diagram
+
+left to right direction
+actor Student as S
+actor Admin as A
+actor "Payment Gateway\n(Flutterwave)" as PG
+actor "Email Service\n(Resend)" as ES
+actor "Auth Provider\n(Supabase)" as AP
+
+rectangle DuesPay {
+  (Sign Up) as UC_Signup
+  (Log In) as UC_Login
+  (Reset Password) as UC_Reset
+  (Update Profile) as UC_Profile
+
+  (View Dues) as UC_ViewDues
+  (Filter Dues) as UC_Filter
+  (Pay Due) as UC_Pay
+  (View Payment History) as UC_History
+  (Download Receipt) as UC_Receipt
+
+  (Add Due Definition) as UC_AddDue
+  (Remove Due Definition) as UC_RemoveDue
+  (View Paid Students) as UC_ViewPaid
+  (Send Notifications) as UC_Notify
+
+  (Record Payment) as UC_Record
+  (Payment Webhook Verified) as UC_Webhook
+  (Generate Receipt) as UC_GenReceipt
+  (Update Status) as UC_UpdateStatus
+}
+
+S -- UC_Signup
+S -- UC_Login
+S -- UC_Reset
+S -- UC_Profile
+S -- UC_ViewDues
+S -- UC_Filter
+S -- UC_Pay
+S -- UC_History
+S -- UC_Receipt
+
+A -- UC_Login
+A -- UC_AddDue
+A -- UC_RemoveDue
+A -- UC_ViewPaid
+A -- UC_Notify
+
+UC_Login ..> AP : authenticate
+UC_Signup ..> AP : register
+UC_Reset ..> AP : email link
+
+UC_Pay ..> PG : initiate payment
+PG ..> UC_Webhook
+UC_Webhook ..> UC_Record : includes
+UC_Record ..> UC_UpdateStatus : includes
+UC_Record ..> UC_GenReceipt : includes
+
+UC_Notify ..> ES : send email
+UC_GenReceipt ..> ES : email receipt
+
+note right of UC_Webhook
+  Endpoint: /api/payments/webhook
+end note
+
+note right of UC_Notify
+  Endpoint: /api/admin/notify
+end note
+
+@enduml
+
